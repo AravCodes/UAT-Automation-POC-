@@ -1,0 +1,11 @@
+python
+fastapi
+uvicorn[standard]
+pydantic
+openai
+spacy
+python-dotenv
+playwright
+jinja2
+sqlmodel
+python-multipart
