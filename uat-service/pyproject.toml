@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "uat-service"
+version = "0.1.0"
+description = "AI-powered UAT automation service (POC)"
+authors = ["UAT POC <dev@example.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = {version = "^0.30.0", extras = ["standard"]}
+pydantic = "^2.8.2"
+openai = "^1.50.2"
+spacy = "^3.7.5"
+python-dotenv = "^1.0.1"
+playwright = "^1.48.0"
+jinja2 = "^3.1.4"
+sqlmodel = "^0.0.22"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+

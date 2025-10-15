@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UAT Runner (POC)</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; }
+    input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #d7dce1; border-radius: 6px; margin-top: 6px; }
+    label { display: block; font-weight: 600; margin-top: 12px; }
+    button { padding: 10px 12px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 16px; }
+    .container { max-width: 760px; margin: 0 auto; }
+    .hint { color: #64748b; font-size: 12px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Run UAT Story (POC)</h1>
+    <form method="post" action="/run">
+      <label for="title">Story Title</label>
+      <input id="title" name="title" placeholder="Login as a user" required />
+
+      <label for="criteria">Acceptance Criteria (separate scenarios by a blank line)</label>
+      <textarea id="criteria" name="acceptance_criteria" rows="8" placeholder="Given I am on the login page
+When I enter a valid email and password and click Login
+Then I should be redirected to the dashboard and see a welcome message
+
+When I enter incorrect credentials, I see an error message" required></textarea>
+      <div class="hint">Separate each scenario with a blank line.</div>
+
+      <label for="target">Target URL</label>
+      <input id="target" name="target_url" value="{{ default_target }}" required />
+
+      <button type="submit">Run Story</button>
+    </form>
+  </div>
+</body>
+</html>
+
+
