@@ -1,0 +1,45 @@
+{
+  "score": 100.0,
+  "status": "pass",
+  "total_scenarios": 2,
+  "passed": 2,
+  "failed": 0,
+  "results": [
+    {
+      "scenario": {
+        "name": "Scenario 1: Login as a User",
+        "given": [
+          "Given I am on the login page"
+        ],
+        "when": [
+          "When I enter a valid email and password and click Login",
+          "When I enter incorrect credentials, I see an error message"
+        ],
+        "then": [
+          "Then I should be redirected to the dashboard and see a welcome message"
+        ],
+        "variant": "positive"
+      },
+      "passed": true,
+      "errors": []
+    },
+    {
+      "scenario": {
+        "name": "Scenario 1: Login as a User",
+        "given": [
+          "Given I am on the login page"
+        ],
+        "when": [
+          "When I enter a valid email and password and click Login",
+          "When I enter incorrect credentials, I see an error message"
+        ],
+        "then": [
+          "Then I should be redirected to the dashboard and see a welcome message"
+        ],
+        "variant": "negative"
+      },
+      "passed": true,
+      "errors": []
+    }
+  ]
+}

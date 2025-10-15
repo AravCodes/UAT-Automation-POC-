@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install and build sample app
+        run: |
+          cd sample-app
+          npm ci || npm i
+          node -v
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          pip install poetry
+
+      - name: Install uat-service deps
+        run: |
+          cd uat-service
+          poetry install
+          poetry run python -c "import sys; print(sys.version)"
+
+      - name: Install Playwright Chromium
+        run: |
+          cd uat-service
+          poetry run playwright install chromium
+
+
