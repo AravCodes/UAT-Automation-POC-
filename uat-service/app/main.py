@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional
@@ -9,11 +9,31 @@ import uuid
 import os
 import sys
 import asyncio
+import json
 from .nlp import parse_story_to_scenarios
 from .executor import run_scenarios
 from .reporting import score_and_summarize, write_json_report, write_html_report
 
-app = FastAPI(title="UAT Automation Service (POC)")
+# Import v2 API routers
+from .api.v2 import stories, runs, reports, webhooks
+from .api.middleware import setup_middleware
+from .core.config import get_config
+from .core.logging import get_logger
+
+logger = get_logger(__name__)
+config = get_config()
+
+app = FastAPI(
+    title="UAT Automation Service",
+    description="UAT Automation Service with LLM-powered test generation (v1 POC + v2 API)",
+    version="2.0.0",
+    docs_url="/docs" if config.enable_api_docs else None,
+    redoc_url="/redoc" if config.enable_api_docs else None
+)
+
+# Set up middleware for v2 API
+setup_middleware(app)
+
 # Ensure artifacts directory exists before mounting
 os.makedirs("artifacts", exist_ok=True)
 app.mount("/artifacts", StaticFiles(directory="artifacts"), name="artifacts")
@@ -27,13 +47,26 @@ if sys.platform.startswith("win"):
         # Best-effort; if unavailable, continue with default policy
         pass
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Include v2 API routers
+app.include_router(stories.router, tags=["v2-stories"])
+app.include_router(runs.router, tags=["v2-execution"])
+app.include_router(reports.router, tags=["v2-reports"])
+app.include_router(webhooks.router, tags=["v2-webhooks"])
+
+logger.info(
+    "UAT Automation Service started",
+    extra={
+        "extra_fields": {
+            "version": "2.0.0",
+            "environment": config.environment,
+            "api_docs": f"http://localhost:{config.api_port}/docs" if config.enable_api_docs else "disabled"
+        }
+    }
 )
+
+# ============================================================================
+# V1 POC Endpoints (Legacy - for backward compatibility)
+# ============================================================================
 
 
 class AcceptanceCriterion(BaseModel):
@@ -79,6 +112,40 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html.j2", {"request": request, "default_target": os.getenv("SAMPLE_APP_URL", "http://localhost:5173")})
 
 
+@app.get("/api/sample-stories")
+async def get_sample_stories():
+    """
+    Serve sample user stories from fixtures.
+    
+    Returns:
+        JSON response with sample stories for all modules
+    """
+    try:
+        fixture_path = os.path.join("fixtures", "sample-stories.json")
+        
+        # Check if fixture file exists
+        if not os.path.exists(fixture_path):
+            logger.warning(f"Sample stories fixture not found at {fixture_path}")
+            return JSONResponse(
+                content={"stories": []},
+                status_code=200
+            )
+        
+        # Load and return sample stories
+        with open(fixture_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        logger.info(f"Loaded {len(data.get('stories', []))} sample stories")
+        return JSONResponse(content=data, status_code=200)
+        
+    except Exception as e:
+        logger.error(f"Failed to load sample stories: {str(e)}", exc_info=True)
+        return JSONResponse(
+            content={"stories": [], "error": str(e)},
+            status_code=500
+        )
+
+
 @app.post("/run")
 async def run_from_form(
     request: Request,
@@ -90,4 +157,35 @@ async def run_from_form(
     story = StoryRequest(title=title, description=None, acceptance_criteria=[{"text": c} for c in criteria], target_url=target_url)  # type: ignore[arg-type]
     result = await run_story(story)  # reuse logic
     return RedirectResponse(url=result.details.get("report_html", "/"), status_code=303)
+
+
+# ============================================================================
+# System Endpoints
+# ============================================================================
+
+@app.get("/health", tags=["system"])
+async def health_check():
+    """Health check endpoint."""
+    return {
+        "status": "healthy",
+        "version": "2.0.0",
+        "environment": config.environment
+    }
+
+
+@app.get("/version", tags=["system"])
+async def get_version():
+    """Get API version information."""
+    return {
+        "version": "2.0.0",
+        "api_version": "v2",
+        "environment": config.environment,
+        "features": {
+            "v1_poc": True,
+            "v2_api": True,
+            "llm_integration": True,
+            "webhooks": config.enable_webhooks,
+            "api_docs": config.enable_api_docs
+        }
+    }
 

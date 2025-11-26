@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAT Report - {{ story.title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header .meta {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .summary-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .summary-card .subtext {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .status-passed { color: #10b981; }
+        .status-failed { color: #ef4444; }
+        .status-partial { color: #f59e0b; }
+        .status-skipped { color: #6b7280; }
+        
+        .bg-passed { background: #d1fae5; border-left-color: #10b981; }
+        .bg-failed { background: #fee2e2; border-left-color: #ef4444; }
+        .bg-partial { background: #fef3c7; border-left-color: #f59e0b; }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-segment {
+            height: 100%;
+            float: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .progress-passed { background: #10b981; }
+        .progress-failed { background: #ef4444; }
+        .progress-skipped { background: #6b7280; }
+        
+        .story-details {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .story-details p {
+            margin: 10px 0;
+        }
+        
+        .story-details strong {
+            color: #667eea;
+            display: inline-block;
+            min-width: 80px;
+        }
+        
+        .criteria-list {
+            margin-top: 20px;
+        }
+        
+        .criterion-item {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e5e7eb;
+        }
+        
+        .criterion-item.passed { border-left-color: #10b981; }
+        .criterion-item.failed { border-left-color: #ef4444; }
+        .criterion-item.partial { border-left-color: #f59e0b; }
+        
+        .criterion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .criterion-text {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .criterion-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .scenario-list {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+        
+        .scenario-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .scenario-type {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .scenario-duration {
+            font-size: 0.85em;
+            color: #999;
+        }
+        
+        .step-list {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .step-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-item.passed { background: #d1fae5; }
+        .step-item.failed { background: #fee2e2; }
+        
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+        
+        .step-icon.passed { background: #10b981; color: white; }
+        .step-icon.failed { background: #ef4444; color: white; }
+        
+        .step-details {
+            flex: 1;
+        }
+        
+        .step-action {
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .step-target {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 0.85em;
+        }
+        
+        .screenshot-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+        
+        .screenshot-link:hover {
+            text-decoration: underline;
+        }
+        
+        .recommendations {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .recommendations h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .recommendations li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .recommendations li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .flaky-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .chart-container {
+            margin: 30px 0;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .section {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ story.title }}</h1>
+            <div class="meta">
+                <p>Run ID: {{ run_result.id }} | Generated: {{ generated_at|format_timestamp }}</p>
+                <p>Duration: {{ (run_result.completed_at - run_result.started_at).total_seconds()|round(2) }}s</p>
+            </div>
+        </div>
+        
+        <!-- Executive Summary -->
+        <div class="summary-grid">
+            <div class="summary-card {% if executive_summary.pass_percentage >= 80 %}bg-passed{% elif executive_summary.pass_percentage >= 50 %}bg-partial{% else %}bg-failed{% endif %}">
+                <h3>Pass Rate</h3>
+                <div class="value">{{ executive_summary.pass_percentage|round(1) }}%</div>
+                <div class="subtext">{{ executive_summary.passed_scenarios }}/{{ executive_summary.total_scenarios }} scenarios</div>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Total Scenarios</h3>
+                <div class="value">{{ executive_summary.total_scenarios }}</div>
+                <div class="subtext">
+                    <span class="status-passed">{{ executive_summary.passed_scenarios }} passed</span> |
+                    <span class="status-failed">{{ executive_summary.failed_scenarios }} failed</span>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Duration</h3>
+                <div class="value">{{ executive_summary.total_duration_ms|format_duration }}</div>
+                <div class="subtext">Total execution time</div>
+            </div>
+            
+            {% if executive_summary.flaky_test_count > 0 %}
+            <div class="summary-card bg-partial">
+                <h3>Flaky Tests</h3>
+                <div class="value">{{ executive_summary.flaky_test_count }}</div>
+                <div class="subtext">Passed after retry</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="section">
+            <h2>Test Results Overview</h2>
+            <div class="progress-bar">
+                {% set total = executive_summary.total_scenarios %}
+                {% if total > 0 %}
+                    {% if executive_summary.passed_scenarios > 0 %}
+                    <div class="progress-segment progress-passed" style="width: {{ (executive_summary.passed_scenarios / total * 100)|round(1) }}%">
+                        {{ executive_summary.passed_scenarios }}
+                    </div>
+                    {% endif %}
+                    {% if executive_summary.failed_scenarios > 0 %}
+                    <div class="progress-segment progress-failed" style="width: {{ (executive_summary.failed_scenarios / total * 100)|round(1) }}%">
+                        {{ executive_summary.failed_scenarios }}
+                    </div>
+                    {% endif %}
+                    {% if executive_summary.skipped_scenarios > 0 %}
+                    <div class="progress-segment progress-skipped" style="width: {{ (executive_summary.skipped_scenarios / total * 100)|round(1) }}%">
+                        {{ executive_summary.skipped_scenarios }}
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Story Details -->
+        <div class="section">
+            <h2>User Story</h2>
+            <div class="story-details">
+                <p><strong>As a</strong> {{ story.role }}</p>
+                <p><strong>I want</strong> {{ story.feature }}</p>
+                <p><strong>So that</strong> {{ story.benefit }}</p>
+            </div>
+        </div>
+        
+        <!-- Acceptance Criteria Results -->
+        <div class="section">
+            <h2>Acceptance Criteria Results</h2>
+            <div class="criteria-list">
+                {% for criterion_id, criterion_data in story_mapping.criteria_results.items() %}
+                <div class="criterion-item {{ criterion_data.status }}">
+                    <div class="criterion-header">
+                        <div class="criterion-text">{{ criterion_data.criterion.text }}</div>
+                        <span class="criterion-status status-{{ criterion_data.status }}">
+                            {{ criterion_data.status|upper }}
+                        </span>
+                    </div>
+                    
+                    {% if criterion_data.scenarios %}
+                    <div class="scenario-list">
+                        {% for scenario_data in criterion_data.scenarios %}
+                        {% set scenario = scenario_data.scenario %}
+                        {% set result = scenario_data.result %}
+                        <div class="scenario-item">
+                            <div class="scenario-header">
+                                <div>
+                                    <strong>{{ scenario.type.value|capitalize }} Scenario</strong>
+                                    <span class="scenario-type">(Priority: {{ scenario.priority.value }})</span>
+                                    {% if result.is_flaky %}
+                                    <span class="flaky-badge">FLAKY</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <span class="criterion-status status-{{ result.status.value }}">
+                                        {{ result.status.value|upper }}
+                                    </span>
+                                    <span class="scenario-duration">{{ result.duration_ms|format_duration }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Given-When-Then -->
+                            <div style="margin: 10px 0; font-size: 0.9em;">
+                                <div><strong>Given:</strong> {{ scenario.given|join(', ') }}</div>
+                                <div><strong>When:</strong> {{ scenario.when|join(', ') }}</div>
+                                <div><strong>Then:</strong> {{ scenario.then|join(', ') }}</div>
+                            </div>
+                            
+                            <!-- Steps -->
+                            <div class="step-list">
+                                {% for step_result in result.step_results %}
+                                <div class="step-item {{ step_result.status.value }}">
+                                    <div class="step-icon {{ step_result.status.value }}">
+                                        {% if step_result.status.value == 'passed' %}✓{% else %}✗{% endif %}
+                                    </div>
+                                    <div class="step-details">
+                                        <div>
+                                            <span class="step-action">{{ step_result.step.action.value }}</span>
+                                            <span class="step-target">{{ step_result.step.target }}</span>
+                                            {% if step_result.step.value %}
+                                            <span class="step-target">= "{{ step_result.step.value }}"</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if step_result.error_message %}
+                                        <div class="error-message">
+                                            {{ step_result.error_message }}
+                                        </div>
+                                        {% endif %}
+                                        {% if step_result.screenshot_path %}
+                                        <a href="{{ step_result.screenshot_path }}" class="screenshot-link" target="_blank">
+                                            📷 View Screenshot
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                    <div class="scenario-duration">{{ step_result.duration_ms|format_duration }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Recommendations -->
+        {% if executive_summary.recommendations %}
+        <div class="section">
+            <div class="recommendations">
+                <h3>Recommendations</h3>
+                <ul>
+                    {% for recommendation in executive_summary.recommendations %}
+                    <li>{{ recommendation }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Critical Failures -->
+        {% if executive_summary.critical_failures %}
+        <div class="section">
+            <h2>Critical Failures</h2>
+            {% for failure in executive_summary.critical_failures %}
+            <div class="error-message" style="margin: 10px 0;">
+                {{ failure }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

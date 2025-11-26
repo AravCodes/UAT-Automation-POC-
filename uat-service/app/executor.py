@@ -7,6 +7,7 @@ from playwright.sync_api import sync_playwright
 def _run_scenarios_sync(scenarios: List[Dict], target_url: str, artifacts_dir: str) -> Dict:
     results: List[Dict] = []
     with sync_playwright() as p:
+        # browser = p.chromium.launch(headless=False, slow_mo=1000)
         browser = p.chromium.launch()
         context = browser.new_context()
         page = context.new_page()
