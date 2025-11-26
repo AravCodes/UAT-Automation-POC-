@@ -1,7 +1,7 @@
-python
 fastapi
 uvicorn[standard]
 pydantic
+pydantic-settings
 openai
 spacy
 python-dotenv
@@ -9,3 +9,11 @@ playwright
 jinja2
 sqlmodel
 python-multipart
+httpx
+
+# Testing dependencies
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+pytest-html>=4.1.0
+pytest-xdist>=3.5.0
