@@ -1,0 +1,224 @@
+# UAT Automation Service - Docker Compose Configuration
+# This file orchestrates the UAT service, sample application, and Redis cache
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # UAT Automation Service
+  # ============================================================================
+  uat-service:
+    build:
+      context: ./uat-service
+      dockerfile: Dockerfile
+    container_name: uat-service
+    ports:
+      - "8000:8000"
+    environment:
+      # LLM Configuration
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - MODEL_PRIMARY=${MODEL_PRIMARY:-llama-3.1-70b-versatile}
+      - MODEL_FALLBACK=${MODEL_FALLBACK:-llama-3.1-8b-instant}
+      - LLM_TIMEOUT=${LLM_TIMEOUT:-30}
+      - LLM_MAX_RETRIES=${LLM_MAX_RETRIES:-3}
+      - ENABLE_LEGACY_NLP_FALLBACK=${ENABLE_LEGACY_NLP_FALLBACK:-true}
+      
+      # Test Execution Configuration
+      - CONCURRENCY=${CONCURRENCY:-3}
+      - TEST_TIMEOUT=${TEST_TIMEOUT:-30000}
+      - RETRY_ATTEMPTS=${RETRY_ATTEMPTS:-1}
+      - RETRY_DELAY=${RETRY_DELAY:-2000}
+      - HEADLESS_MODE=${HEADLESS_MODE:-true}
+      - SCREENSHOT_ON_FAILURE=${SCREENSHOT_ON_FAILURE:-true}
+      - CAPTURE_CONSOLE_LOGS=${CAPTURE_CONSOLE_LOGS:-true}
+      - CAPTURE_NETWORK=${CAPTURE_NETWORK:-true}
+      
+      # Element Finding Configuration
+      - FUZZY_MATCH_THRESHOLD=${FUZZY_MATCH_THRESHOLD:-0.8}
+      - ENABLE_LLM_SELECTOR_SUGGESTIONS=${ENABLE_LLM_SELECTOR_SUGGESTIONS:-true}
+      - ELEMENT_WAIT_TIMEOUT=${ELEMENT_WAIT_TIMEOUT:-10000}
+      
+      # Sample Application Configuration
+      - SAMPLE_APP_URL=http://sample-app:5173
+      - SAMPLE_APP_API_URL=http://sample-app:3000
+      
+      # Database Configuration
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./uat_service.db}
+      - DATABASE_ECHO=${DATABASE_ECHO:-false}
+      
+      # Cache Configuration (Redis)
+      - REDIS_URL=redis://redis:6379
+      - REDIS_DB=${REDIS_DB:-0}
+      - ENABLE_CACHE=${ENABLE_CACHE:-true}
+      - CACHE_DOM_TTL=${CACHE_DOM_TTL:-3600}
+      - CACHE_LLM_TTL=${CACHE_LLM_TTL:-86400}
+      
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - ENABLE_CORS=${ENABLE_CORS:-true}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - ENABLE_API_DOCS=${ENABLE_API_DOCS:-true}
+      
+      # Webhook Configuration
+      - ENABLE_WEBHOOKS=${ENABLE_WEBHOOKS:-true}
+      - WEBHOOK_TIMEOUT=${WEBHOOK_TIMEOUT:-10}
+      
+      # Reporting Configuration
+      - DEFAULT_REPORT_FORMAT=${DEFAULT_REPORT_FORMAT:-html}
+      - ARTIFACTS_DIR=/app/artifacts
+      - REPORT_RETENTION_DAYS=${REPORT_RETENTION_DAYS:-30}
+      
+      # Logging Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+      - LOG_REQUESTS=${LOG_REQUESTS:-true}
+      
+      # Feature Flags
+      - ENABLE_FLAKY_TEST_DETECTION=${ENABLE_FLAKY_TEST_DETECTION:-true}
+      - ENABLE_ANALYTICS=${ENABLE_ANALYTICS:-true}
+      
+      # Environment
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-false}
+    
+    volumes:
+      # Persist artifacts (test results, screenshots, reports)
+      - ./uat-service/artifacts:/app/artifacts
+      # Mount fixtures for sample stories
+      - ./uat-service/fixtures:/app/fixtures:ro
+      # Persist database (if using SQLite)
+      - ./uat-service/data:/app/data
+    
+    depends_on:
+      redis:
+        condition: service_healthy
+      sample-app:
+        condition: service_started
+    
+    networks:
+      - uat-network
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================================
+  # Sample Application (React + Vite + Node.js Backend)
+  # ============================================================================
+  sample-app:
+    build:
+      context: ./sample-app
+      dockerfile: Dockerfile
+    container_name: sample-app
+    ports:
+      - "5173:5173"  # Vite dev server
+      - "3000:3000"  # Node.js backend
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VITE_API_URL=http://localhost:3000
+    
+    volumes:
+      # Mount source code for hot reload in development
+      - ./sample-app/src:/app/src:ro
+      - ./sample-app/public:/app/public:ro
+    
+    networks:
+      - uat-network
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ============================================================================
+  # Redis Cache
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: uat-redis
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      # Persist Redis data
+      - redis-data:/data
+    
+    networks:
+      - uat-network
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  uat-network:
+    driver: bridge
+    name: uat-network
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  redis-data:
+    driver: local
+    name: uat-redis-data
+
+# ============================================================================
+# Usage Instructions
+# ============================================================================
+# 
+# 1. Set up environment variables:
+#    cp uat-service/.env.example uat-service/.env
+#    # Edit .env and set GROQ_API_KEY
+# 
+# 2. Start all services:
+#    docker-compose up -d
+# 
+# 3. View logs:
+#    docker-compose logs -f uat-service
+#    docker-compose logs -f sample-app
+# 
+# 4. Access services:
+#    - UAT Service API: http://localhost:8000
+#    - API Documentation: http://localhost:8000/docs
+#    - Sample Application: http://localhost:5173
+#    - Redis: localhost:6379
+# 
+# 5. Stop all services:
+#    docker-compose down
+# 
+# 6. Stop and remove volumes:
+#    docker-compose down -v
+# 
+# 7. Rebuild services:
+#    docker-compose up -d --build
+# 
+# 8. Scale UAT service (for load testing):
+#    docker-compose up -d --scale uat-service=3
+# 
+# 9. View service status:
+#    docker-compose ps
+# 
+# 10. Execute commands in containers:
+#     docker-compose exec uat-service bash
+#     docker-compose exec sample-app sh
+# 
