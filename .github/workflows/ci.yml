@@ -42,5 +42,3 @@ jobs:
         run: |
           cd uat-service
           poetry run playwright install chromium
-
-
