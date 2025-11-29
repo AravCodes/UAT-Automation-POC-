@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1 data-testid="store-title">E-Commerce Store</h1>
+            <div class="nav-links">
+                <a href="index.html" data-testid="nav-home">Home</a>
+                <a href="cart.html" data-testid="nav-cart">Cart (<span data-testid="cart-count">0</span>)</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <h2 data-testid="cart-page-title">Shopping Cart</h2>
+        <div class="cart-container" data-testid="cart-container">
+            <div class="empty-cart-message" data-testid="empty-cart-message" style="display: none;">
+                <p>Your cart is empty. <a href="index.html">Start shopping!</a></p>
+            </div>
+            <table class="cart-table" data-testid="cart-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody data-testid="cart-items">
+                    <!-- Cart items will be loaded here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="total-label">Total:</td>
+                        <td class="total-amount" data-testid="cart-total">$0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="checkout-section" data-testid="checkout-section" style="display: none;">
+                <button class="checkout-btn" data-testid="checkout-button">Proceed to Checkout</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

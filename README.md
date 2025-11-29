@@ -1,72 +1,139 @@
+# E-Commerce Web Application
 
-# Automated UAT from User Stories – POC
-
-## Purpose
-Turn business user stories into executable UAT checks. This POC ingests acceptance criteria, converts them into BDD-like scenarios, runs the flow against a sample web app via Playwright, and produces business-friendly HTML/JSON reports mapped to the story.
-
-## What this includes
-- sample-app/: Minimal login app (Express + static HTML) used as the UAT target.
-- uat-service/: FastAPI backend with:
-  - Story form UI (manual ingestion)
-  - Heuristic NLP → BDD scenario parsing
-  - Playwright executor (positive + negative login paths)
-  - Report generation (HTML + JSON) under artifacts/
-- .github/workflows/ci.yml: Basic CI to install dependencies and validate environment.
-
-## Primary Use Cases
-- Validate a login user story (happy path + invalid password).
-- Demonstrate the flow: Story → Scenarios → DOM actions → Assertions → Report.
-- Foundation for future integrations (Jira, embeddings, multi-module UAT).
+A complete sample e-commerce web application built for testing purposes with stable `data-testid` attributes on all interactive elements.
 
 ## Tech Stack
-- Backend: FastAPI (Python 3.11), Jinja2, Playwright (Chromium)
-- Sample App: Node.js (Express), static HTML with data-testid locators
 
-## Local Setup (Windows PowerShell)
-1) Start sample app (http://localhost:5173):
-```powershell
-cd sample-app
-npm i
-npm run dev
+- **Frontend**: HTML + CSS + Vanilla JavaScript
+- **Backend**: Node.js + Express
+
+## Project Structure
+
+```
+ecommerce-app/
+├── server.js          # Express server with API endpoints
+├── package.json       # Dependencies
+├── public/
+│   ├── index.html    # Home page with product listing
+│   ├── product.html  # Product details page
+│   ├── cart.html     # Shopping cart page
+│   ├── login.html    # Login page
+│   ├── signup.html   # Sign up page
+│   ├── styles.css    # Styling
+│   └── app.js        # Frontend JavaScript logic
+└── README.md
 ```
 
-2) Start UAT service (http://localhost:8000):
-```powershell
-cd ..\uat-service
-pip install poetry
-poetry install
-poetry run playwright install chromium
-poetry run uvicorn app.main:app --reload --port 8000
+## Installation
+
+1. Install dependencies:
+```bash
+npm install
 ```
 
-3) Run a story (via UI):
-- Open http://localhost:8000/
-- Title: Login as a user
-- Acceptance Criteria (scenarios separated by a blank line):
-  Given I am on the login page
-  When I enter a valid email and password and click Login
-  Then I should be redirected to the dashboard and see a welcome message
+## Running the Application
 
-  When I enter incorrect credentials, I see an error message
-- Target URL: http://localhost:5173
-- Submit → Redirects to /artifacts/<runId>/report.html
-
-4) Run via API (optional):
-POST http://localhost:8000/stories:run
-```json
-{
-  "title": "Login as a user",
-  "description": "User can log in and see dashboard",
-  "acceptance_criteria": [
-    { "text": "Given I am on the login page\nWhen I enter a valid email and password and click Login\nThen I should be redirected to the dashboard and see a welcome message" },
-    { "text": "When I enter incorrect credentials, I see an error message" }
-  ],
-  "target_url": "http://localhost:5173"
-}
+1. Start the server:
+```bash
+npm start
 ```
 
-## Notes and Extensibility
-- Validates positive and negative login paths.
-- Reports saved at uat-service/artifacts/<runId>/
-- Set default target via SAMPLE_APP_URL for the form.
-- Next: Jira CSV import; embeddings-based semantic matching; richer DOM mapping.
+2. Open your browser and navigate to:
+```
+http://localhost:3000
+```
+
+## Features
+
+### Authentication
+- **Login Page** (`login.html`)
+  - User login with email and password
+  - Validates credentials against stored users
+  - Elements include:
+    - `data-testid="login-form"`
+    - `data-testid="email-input"`
+    - `data-testid="password-input"`
+    - `data-testid="login-submit-button"`
+    - `data-testid="login-error-message"`
+    - `data-testid="signup-link"`
+
+- **Sign Up Page** (`signup.html`)
+  - User registration with name, email, and password
+  - Checks for duplicate emails
+  - Elements include:
+    - `data-testid="signup-form"`
+    - `data-testid="name-input"`
+    - `data-testid="email-input"`
+    - `data-testid="password-input"`
+    - `data-testid="signup-submit-button"`
+    - `data-testid="signup-error-message"`
+    - `data-testid="login-link"`
+
+- **Session Management**
+  - Express sessions for user authentication
+  - Per-user cart storage
+  - Navigation shows user name and logout when authenticated
+  - Navigation shows login link when not authenticated
+
+### Home Page (`index.html`)
+- Displays 6 sample products
+- Each product card has:
+  - `data-testid="product-card-{id}"`
+  - `data-testid="product-name-{id}"`
+  - `data-testid="product-price-{id}"`
+  - `data-testid="view-button-{id}"`
+
+### Product Page (`product.html`)
+- Shows detailed product information
+- Elements include:
+  - `data-testid="product-image"`
+  - `data-testid="product-title"`
+  - `data-testid="product-description"`
+  - `data-testid="product-price"`
+  - `data-testid="quantity-input"`
+  - `data-testid="add-to-cart-button"`
+
+### Cart Page (`cart.html`)
+- Displays items in the shopping cart
+- Elements include:
+  - `data-testid="cart-item-{id}"`
+  - `data-testid="cart-item-name-{id}"`
+  - `data-testid="cart-item-price-{id}"`
+  - `data-testid="cart-item-qty-{id}"`
+  - `data-testid="remove-item-{id}"`
+  - `data-testid="checkout-button"`
+  - `data-testid="empty-cart-message"`
+
+## API Endpoints
+
+### Product Endpoints
+- `GET /products` - Returns all products
+- `GET /product/:id` - Returns product details by ID
+
+### Authentication Endpoints
+- `POST /auth/signup` - Register new user (body: `{ name, email, password }`)
+- `POST /auth/login` - Authenticate user (body: `{ email, password }`)
+- `POST /auth/logout` - Logout current user
+- `GET /auth/me` - Get current authenticated user
+
+### Cart Endpoints
+- `POST /cart/add` - Adds item to cart (body: `{ productId, quantity }`)
+- `GET /cart` - Returns current cart items (per user session)
+- `POST /cart/remove` - Removes item from cart (body: `{ productId }`)
+
+## Sample User Credentials
+
+For testing purposes, a sample user is pre-configured:
+- **Email**: `test@example.com`
+- **Password**: `password123`
+
+You can also create new accounts using the sign-up page.
+
+## Testing
+
+All interactive elements include stable `data-testid` attributes for easy testing with tools like:
+- Cypress
+- Playwright
+- Selenium
+- Jest with testing-library
+
