@@ -1,8 +1,6 @@
-# Automated UAT from User Stories – POC
+# AI-driven UAT Automation
 
-# AI-driven UAT Automation — Proof of Concept
-
-This repository is a proof-of-concept for an AI-powered UAT (User Acceptance Testing) automation platform. It demonstrates an end-to-end pipeline that converts user stories / acceptance criteria into executable, DOM-aware test scenarios and runs them against a UAT web app using Playwright.
+This repository is an AI-powered UAT (User Acceptance Testing) automation platform. It demonstrates an end-to-end pipeline that converts user stories / acceptance criteria into executable, DOM-aware test scenarios and runs them against a UAT web app using Playwright.
 
 ## Flow (architecture)
 
@@ -22,18 +20,9 @@ flowchart TD
   end
 
   style A fill:#f9f,stroke:#333,stroke-width:1px
-  style E fill:#bbf,stroke:#333,stroke-width:1px
-  style F fill:#bfb,stroke:#333,stroke-width:1px
+  style E fill:#f9f,stroke:#333,stroke-width:1px
+  style F fill:#f9f,stroke:#333,stroke-width:1px
 ```
-
-If your renderer doesn't support Mermaid, here's a compact ASCII flow:
-
-User Stories (Excel/Jira)
-  -> Story Parser (NLP)
-    -> LLM produces BDD scenarios (Given/When/Then)
-      -> Scenario Mapper (maps steps → selectors using LLM or heuristics)
-        -> Playwright Executor runs scenarios → captures screenshots, logs
-          -> Reporting engine writes JSON + HTML reports in `artifacts/`
 
 ## Features (what this POC includes)
 
