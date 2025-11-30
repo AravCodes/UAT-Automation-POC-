@@ -133,22 +133,8 @@ Notes:
 - `sample-app/public` — minimal sample web app with `data-testid` attributes
 - `artifacts/` — sample run artifacts (existing PRs or previous runs)
 
-## Next recommended steps
-
-- Add `.gitignore` exclusions for `sample-app/node_modules` and remove those files from the repo index.
-- Add unit tests (pytest) for parser and fallback logic.
-- Add a small Dockerfile or docker-compose to run the service + sample app reproducibly.
-
 ---
 
-If you want, I can now:
-- commit this README and push to the current branch (I will do that),
-- clean up `node_modules` from the repository and add to `.gitignore`, or
-- add unit tests as a follow-up.
-2. **LLM Parsing**: OpenAI GPT-4o-mini parses acceptance criteria into structured BDD scenarios (Given/When/Then)
-3. **Step Mapping**: For each step, LLM maps the natural language to Playwright actions (navigate, click, fill, assert)
-4. **Execution**: Playwright executes the mapped actions against the e-commerce app
-5. **Reporting**: Results are aggregated, scored, and presented in HTML/JSON reports
 
 ## Notes and Extensibility
 - Uses LLM for intelligent parsing and mapping (falls back to heuristics if API key not set)
