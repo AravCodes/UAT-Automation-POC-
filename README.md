@@ -1,107 +1,150 @@
 # Automated UAT from User Stories – POC
 
-## Purpose
-Turn business user stories into executable UAT checks using LLM and NLP. This POC ingests acceptance criteria, converts them into BDD-like scenarios using OpenAI GPT, maps steps to DOM actions intelligently, runs the flow against a sample e-commerce web app via Playwright, and produces business-friendly HTML/JSON reports mapped to the story.
+# AI-driven UAT Automation — Proof of Concept
 
-## What this includes
-- **sample-app/**: E-commerce web app (Express + static HTML) with product listing, shopping cart, and checkout flows. All UI elements have `data-testid` attributes for reliable test automation.
-- **uat-service/**: FastAPI backend with:
-  - Story form UI (manual ingestion)
-  - **LLM-based NLP** → BDD scenario parsing using OpenAI GPT-4o-mini
-  - **Intelligent step mapping** → DOM action mapping using LLM
-  - Playwright executor (supports e-commerce flows)
-  - Report generation (HTML + JSON) under artifacts/
-- **USER_STORIES.md**: Complete user stories for the e-commerce app with test IDs
+This repository is a proof-of-concept for an AI-powered UAT (User Acceptance Testing) automation platform. It demonstrates an end-to-end pipeline that converts user stories / acceptance criteria into executable, DOM-aware test scenarios and runs them against a UAT web app using Playwright.
 
-## Primary Use Cases
-- Validate e-commerce user stories (browse products, add to cart, checkout)
-- Demonstrate the flow: Story → LLM Parsing → Scenarios → LLM Step Mapping → DOM actions → Assertions → Report
-- Foundation for future integrations (Jira, embeddings, multi-module UAT)
+## Flow (architecture)
 
-## Tech Stack
-- **Backend**: FastAPI (Python 3.11), OpenAI API, Jinja2, Playwright (Chromium)
-- **Sample App**: Node.js (Express), static HTML with comprehensive `data-testid` locators
-- **AI/NLP**: OpenAI GPT-4o-mini for story parsing and step-to-action mapping
+```mermaid
+flowchart TD
+  A[User Stories / Excel / Jira] -->|ingest| B(Story Parser)
+  B -->|parse → BDD| C[LLM / NLP]
+  C -->|scenarios| D[Scenario Mapper]
+  D -->|map steps to selectors| E[Playwright Executor]
+  E -->|run & capture| F[Artifacts & Reports]
+  F -->|report| G[HTML / JSON + Screenshots]
+  G --> H[Dashboard / Audit / JIRA Tickets]
 
-## Prerequisites
-- Node.js and npm
-- Python 3.11+
-- Poetry (Python package manager)
-- OpenAI API key (set as environment variable `OPENAI_API_KEY`)
+  subgraph LLM
+    C
+    D
+  end
 
-## Local Setup (Windows PowerShell)
+  style A fill:#f9f,stroke:#333,stroke-width:1px
+  style E fill:#bbf,stroke:#333,stroke-width:1px
+  style F fill:#bfb,stroke:#333,stroke-width:1px
+```
 
-### 1) Set up OpenAI API Key
+If your renderer doesn't support Mermaid, here's a compact ASCII flow:
+
+User Stories (Excel/Jira)
+  -> Story Parser (NLP)
+    -> LLM produces BDD scenarios (Given/When/Then)
+      -> Scenario Mapper (maps steps → selectors using LLM or heuristics)
+        -> Playwright Executor runs scenarios → captures screenshots, logs
+          -> Reporting engine writes JSON + HTML reports in `artifacts/`
+
+## Features (what this POC includes)
+
+- Input sources:
+  - Excel file parser (example stories can be uploaded via the app)
+  - Manual story POST endpoint
+- NLP / LLM parsing:
+  - Converts acceptance criteria into BDD-style scenarios
+  - Falls back to heuristic parser if LLM unavailable
+- LLM client abstraction:
+  - Supports Ollama (local), Groq, and OpenAI via a unified client
+- DOM mapping & execution:
+  - LLM-assisted step→action mapping with robust fallback heuristics
+  - Playwright-based executor that uses `data-testid` selectors where possible
+  - Screenshot capture on scenario failures
+- Reporting:
+  - JSON and HTML reports written to `artifacts/<run_id>/report.*`
+  - Simple templates in `uat-service/app/templates`
+- Web service:
+  - FastAPI server exposing endpoints for running stories and uploading Excel files
+
+## Brief theory (why this works)
+
+- Natural language acceptance criteria are structured but ambiguous. An LLM is good at extracting intent and rewriting criteria into explicit BDD steps (Given/When/Then).
+- Mapping steps to UI elements is a semantic matching problem: the prototype uses LLM prompts with page HTML context and heuristics prioritizing `data-testid` attributes for robust selectors.
+- Playwright provides reliable, headless browser automation suitable for UAT-level flows. Screenshots and DOM snapshots provide traceability.
+
+## Tech stack
+
+- Python 3.11
+- FastAPI (server)
+- Playwright (executor)
+- OpenAI / Ollama / Groq (LLM providers via `llm_client.py`)
+- Jinja2 (report templates)
+- openpyxl (Excel parsing)
+
+## How to run (PowerShell on Windows)
+
+Recommended: use a virtual environment.
+
+1) Create and activate venv, install dependencies via pip (or use Poetry):
+
 ```powershell
-$env:OPENAI_API_KEY = "your-api-key-here"
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -U pip
+pip install fastapi uvicorn openai spacy python-dotenv playwright jinja2 sqlmodel openpyxl python-multipart requests
+python -m playwright install
 ```
 
-Or create a `.env` file in `uat-service/`:
-```
-OPENAI_API_KEY=your-api-key-here
-```
+2) Start the sample front-end (optional) — this repo includes a minimal `sample-app` that serves `index.html`.
 
-### 2) Start sample e-commerce app (http://localhost:5173):
 ```powershell
-cd sample-app
-npm i
-npm run dev
+cd "sample-app"
+# install dependencies if you haven't already
+npm install
+node server.js
+# sample app serves public/index.html (default port printed by server.js)
 ```
 
-### 3) Start UAT service (http://localhost:8000):
+3) Start the FastAPI service
+
 ```powershell
-cd ..\uat-service
-pip install poetry
-poetry install
-poetry run playwright install chromium
-poetry run uvicorn app.main:app --reload --port 8000
+cd "uat-service"
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4) Run a story (via UI):
-- Open http://localhost:8000/
-- **Title**: Browse Products
-- **Acceptance Criteria** (scenarios separated by a blank line):
-  ```
-  Given I am on the homepage
-  When I view the products section
-  Then I should see a grid of products with images, names, prices, and descriptions
-  And each product should have an "Add to Cart" button
-  ```
-- **Target URL**: http://localhost:5173
-- Submit → Redirects to /artifacts/<runId>/report.html
+4) Use the UI at `http://localhost:8000/` to run stories or upload Excel files. Or call the API:
 
-### 5) Run via API (optional):
-POST http://localhost:8000/stories:run
-```json
+Example curl (PowerShell) — run a single story:
+
+```powershell
+$body = @'
 {
-  "title": "Add Product to Cart",
-  "description": "User can add products to shopping cart",
-  "acceptance_criteria": [
-    {
-      "text": "Given I am on the homepage viewing products\nWhen I click the \"Add to Cart\" button for a product\nThen the product should be added to my cart\nAnd I should see a success message confirming the item was added\nAnd the cart count in the header should increase by 1"
-    }
-  ],
+  "title": "Invite user",
+  "acceptance_criteria": [{"text": "As an Admin, I can invite a new user by email. Given Admin is logged in. When Admin fills Invite form with email and role and clicks Invite. Then the system sends verification email and assigns the role."}],
   "target_url": "http://localhost:5173"
 }
+'@
+
+curl -Method POST -Uri "http://localhost:8000/stories:run" -ContentType "application/json" -Body $body
 ```
 
-## User Stories
+Notes:
+- Ensure LLM provider is configured in environment variables (e.g., `OPENAI_API_KEY` or `OLLAMA_BASE_URL`).
+- Playwright requires browser binaries; `python -m playwright install` installs them.
 
-See `USER_STORIES.md` for complete documentation of all user stories with test IDs:
-- STORY-001: Browse Products
-- STORY-002: Add Product to Cart
-- STORY-003: View Shopping Cart
-- STORY-004: Remove Item from Cart
-- STORY-005: Proceed to Checkout
-- STORY-006: Complete Checkout
-- STORY-007: Empty Cart Handling
-- STORY-008: Cart Persistence
-- STORY-009: Order Summary Accuracy
-- STORY-010: Form Validation
+## Files and locations (quick map)
 
-## How It Works
+- `uat-service/app/` — main service code:
+  - `main.py` — FastAPI app and endpoints
+  - `nlp.py` — convert acceptance criteria → BDD scenarios
+  - `llm_client.py` — unified LLM client
+  - `executor.py` — Playwright execution and mapping
+  - `excel_parser.py` — Excel ingestion
+  - `reporting.py` — JSON/HTML report generation
+- `sample-app/public` — minimal sample web app with `data-testid` attributes
+- `artifacts/` — sample run artifacts (existing PRs or previous runs)
 
-1. **Story Ingestion**: User provides story title and acceptance criteria via UI or API
+## Next recommended steps
+
+- Add `.gitignore` exclusions for `sample-app/node_modules` and remove those files from the repo index.
+- Add unit tests (pytest) for parser and fallback logic.
+- Add a small Dockerfile or docker-compose to run the service + sample app reproducibly.
+
+---
+
+If you want, I can now:
+- commit this README and push to the current branch (I will do that),
+- clean up `node_modules` from the repository and add to `.gitignore`, or
+- add unit tests as a follow-up.
 2. **LLM Parsing**: OpenAI GPT-4o-mini parses acceptance criteria into structured BDD scenarios (Given/When/Then)
 3. **Step Mapping**: For each step, LLM maps the natural language to Playwright actions (navigate, click, fill, assert)
 4. **Execution**: Playwright executes the mapped actions against the e-commerce app
