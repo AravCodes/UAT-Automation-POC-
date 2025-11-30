@@ -5,34 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UAT Runner (POC)</title>
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; }
-    input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #d7dce1; border-radius: 6px; margin-top: 6px; }
-    label { display: block; font-weight: 600; margin-top: 12px; }
-    button { padding: 10px 12px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 16px; }
-    .container { max-width: 760px; margin: 0 auto; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #f6f7f9; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px; }
+    h1 { margin: 0 0 8px; color: #111827; }
+    h2 { margin: 0 0 16px; color: #111827; font-size: 1.25rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+    input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #d7dce1; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; }
+    label { display: block; font-weight: 600; margin-top: 12px; color: #111827; }
+    button { padding: 10px 12px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 16px; font-size: 1rem; }
+    button:hover { background: #1d4ed8; }
+    button.secondary { background: #10b981; }
+    button.secondary:hover { background: #059669; }
     .hint { color: #64748b; font-size: 12px; margin-top: 6px; }
+    .divider { text-align: center; margin: 24px 0; color: #64748b; font-weight: 600; }
+    .file-input-wrapper { position: relative; }
+    input[type="file"] { padding: 8px; }
+    .download-link { display: inline-block; margin-top: 8px; color: #2563eb; text-decoration: none; font-size: 0.875rem; }
+    .download-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Run UAT Story (POC)</h1>
-    <form method="post" action="/run">
-      <label for="title">Story Title</label>
-      <input id="title" name="title" placeholder="Login as a user" required />
+    <h1>UAT Automation Service</h1>
+    <p style="color: #64748b; margin-bottom: 24px;">Run user stories against your application using LLM-based parsing and execution</p>
 
-      <label for="criteria">Acceptance Criteria (separate scenarios by a blank line)</label>
-      <textarea id="criteria" name="acceptance_criteria" rows="8" placeholder="Given I am on the login page
-When I enter a valid email and password and click Login
-Then I should be redirected to the dashboard and see a welcome message
+    <!-- Excel Upload Section -->
+    <div class="card">
+      <h2>📊 Upload Excel File</h2>
+      <p style="color: #64748b; margin-bottom: 16px;">Upload an Excel file containing multiple user stories. Download the template below.</p>
+      
+      <form method="post" action="/upload-excel" enctype="multipart/form-data">
+        <label for="excel_file">Excel File (.xlsx)</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="excel_file" name="file" accept=".xlsx,.xls" required />
+        </div>
+        <div class="hint">Expected columns: Test ID, Title, As a, I want to, So that, Acceptance Criteria, Test IDs</div>
+        
+        <label for="excel_target">Target URL</label>
+        <input id="excel_target" name="target_url" value="{{ default_target }}" required />
 
-When I enter incorrect credentials, I see an error message" required></textarea>
-      <div class="hint">Separate each scenario with a blank line.</div>
+        <button type="submit" class="secondary">📤 Upload and Run All Stories</button>
+      </form>
+      
+      <a href="/static/user_stories.xlsx" class="download-link" download="user_stories.xlsx">📥 Download Excel Template</a>
+    </div>
 
-      <label for="target">Target URL</label>
-      <input id="target" name="target_url" value="{{ default_target }}" required />
+    <div class="divider">OR</div>
 
-      <button type="submit">Run Story</button>
-    </form>
+    <!-- Manual Entry Section -->
+    <div class="card">
+      <h2>✍️ Manual Entry</h2>
+      <p style="color: #64748b; margin-bottom: 16px;">Enter a single user story manually</p>
+      
+      <form method="post" action="/run">
+        <label for="title">Story Title</label>
+        <input id="title" name="title" placeholder="Browse Products" required />
+
+        <label for="criteria">Acceptance Criteria (separate scenarios by a blank line)</label>
+        <textarea id="criteria" name="acceptance_criteria" rows="8" placeholder="Given I am on the homepage
+When I view the products section
+Then I should see a grid of products with images, names, prices, and descriptions
+And each product should have an &quot;Add to Cart&quot; button" required></textarea>
+        <div class="hint">Separate each scenario with a blank line. Use Given/When/Then format.</div>
+
+        <label for="target">Target URL</label>
+        <input id="target" name="target_url" value="{{ default_target }}" required />
+
+        <button type="submit">▶️ Run Story</button>
+      </form>
+    </div>
   </div>
 </body>
 </html>

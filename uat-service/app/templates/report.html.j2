@@ -5,50 +5,140 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UAT Report</title>
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; color: #fff; font-weight: 600; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #f6f7f9; }
+    .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.875rem; }
     .pass { background: #16a34a; }
     .fail { background: #dc2626; }
     .partial { background: #d97706; }
+    .summary { display: flex; gap: 24px; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 6px; }
+    .summary-item { flex: 1; }
+    .summary-value { font-size: 2rem; font-weight: 700; color: #111827; }
+    .summary-label { color: #6b7280; font-size: 0.875rem; margin-top: 4px; }
     table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; font-weight: 600; color: #111827; }
+    .scenario-row { cursor: pointer; }
+    .scenario-row:hover { background: #f9fafb; }
+    .steps-details { display: none; padding: 16px; background: #f9fafb; border-radius: 6px; margin-top: 8px; }
+    .steps-details.expanded { display: block; }
+    .step-item { padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+    .step-item:last-child { border-bottom: none; }
+    .step-type { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 8px; }
+    .step-type.given { background: #dbeafe; color: #1e40af; }
+    .step-type.when { background: #fef3c7; color: #92400e; }
+    .step-type.then { background: #d1fae5; color: #065f46; }
+    .step-text { color: #374151; }
+    .step-error { color: #dc2626; font-size: 0.875rem; margin-top: 4px; }
     .muted { color: #6b7280; font-size: 12px; }
+    h1 { margin: 0 0 8px; color: #111827; }
+    h2 { margin: 24px 0 16px; color: #111827; font-size: 1.25rem; }
   </style>
-  </head>
+  <script>
+    function toggleSteps(index) {
+      const details = document.getElementById('steps-' + index);
+      details.classList.toggle('expanded');
+    }
+  </script>
+</head>
 <body>
-  <h1>UAT Report</h1>
-  <p>Score: <strong>{{ summary.score }}%</strong></p>
-  <p>Status: <span class="badge {{ summary.status }}">{{ summary.status|upper }}</span></p>
-  <p class="muted">Scenarios: {{ summary.passed }} passed / {{ summary.failed }} failed / {{ summary.total_scenarios }} total</p>
+  <div class="container">
+    <h1>UAT Report</h1>
+    <p class="muted">Generated from user story acceptance criteria using LLM-based parsing</p>
+    
+    <div class="summary">
+      <div class="summary-item">
+        <div class="summary-value">{{ summary.score }}%</div>
+        <div class="summary-label">Overall Score</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">
+          <span class="badge {{ summary.status }}">{{ summary.status|upper }}</span>
+        </div>
+        <div class="summary-label">Status</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">{{ summary.passed }}</div>
+        <div class="summary-label">Passed Scenarios</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">{{ summary.failed }}</div>
+        <div class="summary-label">Failed Scenarios</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">{{ summary.total_scenarios }}</div>
+        <div class="summary-label">Total Scenarios</div>
+      </div>
+    </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Scenario</th>
-        <th>Status</th>
-        <th>Errors</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for r in summary.results %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ r.scenario.name }}</td>
-        <td>
-          {% if r.passed %}
-            <span class="badge pass">PASS</span>
-          {% else %}
-            <span class="badge fail">FAIL</span>
-          {% endif %}
-        </td>
-        <td>{% if r.errors %}{{ r.errors|join('; ') }}{% else %}-{% endif %}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+    <h2>Scenario Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Scenario</th>
+          <th>Status</th>
+          <th>Steps</th>
+          <th>Errors</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for r in summary.results %}
+        <tr class="scenario-row" onclick="toggleSteps({{ loop.index0 }})">
+          <td>{{ loop.index }}</td>
+          <td>
+            {% if r.scenario is string %}
+              {{ r.scenario }}
+            {% else %}
+              {{ r.scenario.name }}
+            {% endif %}
+          </td>
+          <td>
+            {% if r.passed %}
+              <span class="badge pass">PASS</span>
+            {% else %}
+              <span class="badge fail">FAIL</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.steps %}
+              {{ r.steps|length }} steps
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if r.errors %}
+              {{ r.errors|length }} error(s)
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% if r.steps %}
+        <tr>
+          <td colspan="5">
+            <div class="steps-details" id="steps-{{ loop.index0 }}">
+              <h3 style="margin-top: 0;">Step Details</h3>
+              {% for step in r.steps %}
+                <div class="step-item">
+                  <span class="step-type {{ step.type }}">{{ step.type|upper }}</span>
+                  <span class="step-text">{{ step.step }}</span>
+                  {% if not step.passed %}
+                    <div class="step-error">❌ {{ step.error }}</div>
+                  {% else %}
+                    <div style="color: #16a34a; font-size: 0.875rem; margin-top: 4px;">✓ Passed</div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
 
+  </div>
 </body>
 </html>
-
-

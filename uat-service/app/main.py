@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi import FastAPI, HTTPException, Request, Form, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,14 +9,28 @@ import uuid
 import os
 import sys
 import asyncio
+from dotenv import load_dotenv
 from .nlp import parse_story_to_scenarios
 from .executor import run_scenarios
 from .reporting import score_and_summarize, write_json_report, write_html_report
+from .excel_parser import parse_excel_file
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI(title="UAT Automation Service (POC)")
 # Ensure artifacts directory exists before mounting
 os.makedirs("artifacts", exist_ok=True)
 app.mount("/artifacts", StaticFiles(directory="artifacts"), name="artifacts")
+
+# Mount static files for Excel template
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+os.makedirs(static_dir, exist_ok=True)
+try:
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+except Exception:
+    pass  # Static directory might not exist yet
+
 templates = Jinja2Templates(directory="app/templates")
 
 # Windows fix: allow asyncio to spawn subprocesses (Playwright) on Windows
@@ -90,4 +104,64 @@ async def run_from_form(
     story = StoryRequest(title=title, description=None, acceptance_criteria=[{"text": c} for c in criteria], target_url=target_url)  # type: ignore[arg-type]
     result = await run_story(story)  # reuse logic
     return RedirectResponse(url=result.details.get("report_html", "/"), status_code=303)
+
+
+@app.post("/upload-excel")
+async def upload_excel(
+    request: Request,
+    file: UploadFile = File(...),
+    target_url: str = Form(...),
+):
+    """Upload and parse Excel file with user stories, then run all stories."""
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="File must be an Excel file (.xlsx or .xls)")
+    
+    try:
+        # Read file content
+        file_content = await file.read()
+        
+        # Parse Excel file
+        stories = parse_excel_file(file_content)
+        
+        if not stories:
+            raise HTTPException(status_code=400, detail="No stories found in Excel file")
+        
+        # Run all stories and collect results
+        results = []
+        for story_data in stories:
+            try:
+                story = StoryRequest(
+                    title=story_data["title"],
+                    description=story_data.get("description"),
+                    acceptance_criteria=[{"text": c} for c in story_data.get("acceptance_criteria", [])],
+                    target_url=target_url
+                )
+                result = await run_story(story)
+                results.append({
+                    "test_id": story_data.get("test_id", "N/A"),
+                    "title": story_data["title"],
+                    "run_id": result.run_id,
+                    "score": result.score,
+                    "status": result.status,
+                    "report_url": result.details.get("report_html", "/")
+                })
+            except Exception as e:
+                results.append({
+                    "test_id": story_data.get("test_id", "N/A"),
+                    "title": story_data["title"],
+                    "error": str(e)
+                })
+        
+        # Create a summary page
+        return templates.TemplateResponse("excel_results.html.j2", {
+            "request": request,
+            "results": results,
+            "total_stories": len(stories),
+            "successful": len([r for r in results if "error" not in r])
+        })
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing Excel file: {str(e)}")
 

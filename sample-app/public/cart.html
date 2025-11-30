@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shopping Cart</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: #f6f7f9; }
+    .header { background: #2563eb; color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { margin: 0; font-size: 1.5rem; }
+    .home-link { color: #fff; text-decoration: none; font-weight: 600; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 6px; }
+    .container { max-width: 900px; margin: 24px auto; padding: 0 24px; }
+    .cart-items { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 24px; }
+    .cart-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
+    .cart-item:last-child { border-bottom: none; }
+    .item-image { width: 80px; height: 80px; background: #e5e7eb; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-right: 16px; }
+    .item-details { flex: 1; }
+    .item-name { font-size: 1.125rem; font-weight: 600; margin: 0 0 4px; }
+    .item-price { color: #2563eb; font-weight: 600; }
+    .item-actions { display: flex; align-items: center; gap: 12px; }
+    .quantity-control { display: flex; align-items: center; gap: 8px; }
+    .quantity-btn { width: 32px; height: 32px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; }
+    .quantity-input { width: 50px; text-align: center; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; }
+    .remove-btn { padding: 6px 12px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.875rem; }
+    .cart-summary { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+    .summary-row.total { border-bottom: none; border-top: 2px solid #2563eb; margin-top: 12px; padding-top: 16px; font-size: 1.25rem; font-weight: 700; }
+    .checkout-btn { width: 100%; padding: 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1.125rem; margin-top: 16px; }
+    .checkout-btn:hover { background: #1d4ed8; }
+    .checkout-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+    .empty-cart { text-align: center; padding: 48px; color: #6b7280; }
+    .empty-cart h2 { color: #111827; }
+    .msg { margin-top: 12px; padding: 10px 12px; border-radius: 6px; }
+    .msg.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .msg.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 data-testid="cart-title">Shopping Cart</h1>
+    <a href="/" class="home-link" data-testid="home-link">Continue Shopping</a>
+  </div>
+  <div class="container">
+    <div id="cart-container" data-testid="cart-container">
+      <div class="cart-items" data-testid="cart-items">
+        <div id="cart-items-list" data-testid="cart-items-list">
+          <!-- Cart items will be loaded here -->
+        </div>
+      </div>
+      <div class="cart-summary" data-testid="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="subtotal" data-testid="cart-subtotal">$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax (10%)</span>
+          <span id="tax" data-testid="cart-tax">$0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="total" data-testid="cart-total">$0.00</span>
+        </div>
+        <button id="checkout-btn" class="checkout-btn" data-testid="checkout-button" onclick="proceedToCheckout()">
+          Proceed to Checkout
+        </button>
+      </div>
+    </div>
+    <div id="empty-cart" class="empty-cart" style="display:none" data-testid="empty-cart">
+      <h2>Your cart is empty</h2>
+      <p>Add some products to get started!</p>
+      <a href="/" class="home-link" style="display:inline-block;margin-top:16px;">Browse Products</a>
+    </div>
+    <div id="message-box" class="msg" style="display:none" data-testid="message-box"></div>
+  </div>
+  <script>
+    function getCart() {
+      return JSON.parse(localStorage.getItem('cart') || '[]');
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    function updateQuantity(productId, newQuantity) {
+      const cart = getCart();
+      const item = cart.find(item => item.id === productId);
+      if (item) {
+        if (newQuantity <= 0) {
+          removeItem(productId);
+        } else {
+          // For simplicity, we'll just keep the item (in real app, you'd update quantity)
+          renderCart();
+        }
+      }
+    }
+
+    function removeItem(productId) {
+      const cart = getCart().filter(item => item.id !== productId);
+      saveCart(cart);
+      renderCart();
+      showMessage('Item removed from cart', 'success');
+    }
+
+    function calculateTotals() {
+      const cart = getCart();
+      const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+      const tax = subtotal * 0.1;
+      const total = subtotal + tax;
+      return { subtotal, tax, total };
+    }
+
+    function showMessage(text, type) {
+      const msgBox = document.getElementById('message-box');
+      msgBox.textContent = text;
+      msgBox.className = `msg ${type}`;
+      msgBox.style.display = 'block';
+      setTimeout(() => { msgBox.style.display = 'none'; }, 3000);
+    }
+
+    function proceedToCheckout() {
+      const cart = getCart();
+      if (cart.length === 0) {
+        showMessage('Your cart is empty', 'error');
+        return;
+      }
+      window.location.href = '/checkout';
+    }
+
+    function renderCart() {
+      const cart = getCart();
+      const itemsList = document.getElementById('cart-items-list');
+      const emptyCart = document.getElementById('empty-cart');
+      const cartContainer = document.getElementById('cart-container');
+
+      if (cart.length === 0) {
+        cartContainer.style.display = 'none';
+        emptyCart.style.display = 'block';
+        return;
+      }
+
+      cartContainer.style.display = 'block';
+      emptyCart.style.display = 'none';
+
+      itemsList.innerHTML = cart.map(item => `
+        <div class="cart-item" data-testid="cart-item-${item.id}">
+          <div class="item-image" data-testid="cart-item-image-${item.id}">${item.image}</div>
+          <div class="item-details">
+            <div class="item-name" data-testid="cart-item-name-${item.id}">${item.name}</div>
+            <div class="item-price" data-testid="cart-item-price-${item.id}">$${item.price.toFixed(2)}</div>
+          </div>
+          <div class="item-actions">
+            <button class="remove-btn" data-testid="remove-item-${item.id}" onclick="removeItem(${item.id})">
+              Remove
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      const { subtotal, tax, total } = calculateTotals();
+      document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+      document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+</body>
+</html>
+

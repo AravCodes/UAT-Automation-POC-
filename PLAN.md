@@ -1,6 +1,4 @@
-# AI-Powered UAT Automation – POC Plan
-
-## Goal
+# Goal
 Build a minimal, end-to-end proof of concept that:
 - Ingests user stories (manual input for MVP) module-by-module (e.g., Login).
 - Parses acceptance criteria into BDD-style Given–When–Then scenarios using an LLM with spaCy fallback.
@@ -122,3 +120,6 @@ Acceptance Criteria:
 - Implement Login sample app
 - Implement FastAPI backend with NLP→BDD and Playwright executor
 - Run first story end-to-end and iterate
+
+
+How does this look?
