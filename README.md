@@ -44,7 +44,7 @@ flowchart TD
 - Web service:
   - FastAPI server exposing endpoints for running stories and uploading Excel files
 
-## Brief theory (why this works)
+## Brief theory
 
 - Natural language acceptance criteria are structured but ambiguous. An LLM is good at extracting intent and rewriting criteria into explicit BDD steps (Given/When/Then).
 - Mapping steps to UI elements is a semantic matching problem: the prototype uses LLM prompts with page HTML context and heuristics prioritizing `data-testid` attributes for robust selectors.
@@ -58,6 +58,18 @@ flowchart TD
 - OpenAI / Ollama / Groq (LLM providers via `llm_client.py`)
 - Jinja2 (report templates)
 - openpyxl (Excel parsing)
+
+##Working Example-
+
+
+https://github.com/user-attachments/assets/f282a8de-0be6-4ea3-a18e-ce88f15218c0
+
+
+
+https://github.com/user-attachments/assets/f3d7fdcd-ef57-4acc-88fe-1e3237032fe0
+
+<img width="923" height="938" alt="Screenshot 2025-11-30 010440" src="https://github.com/user-attachments/assets/b1c9ad8a-b2d4-4f45-bd05-863906670045" />
+
 
 ## How to run (PowerShell on Windows)
 
