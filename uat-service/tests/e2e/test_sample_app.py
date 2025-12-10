@@ -3,8 +3,6 @@ End-to-end tests against sample application.
 
 This module tests the complete UAT automation system against the sample
 application using all 15+ sample user stories from fixtures.
-
-Requirements: All (Task 14.2)
 """
 
 import pytest

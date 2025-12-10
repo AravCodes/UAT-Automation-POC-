@@ -3,8 +3,6 @@ FastAPI application setup for API v2.
 
 This module configures the FastAPI application with all v2 endpoints,
 middleware, OpenAPI documentation, and application lifecycle hooks.
-
-Requirements: 9.1
 """
 
 from fastapi import FastAPI

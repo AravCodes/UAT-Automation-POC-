@@ -3,8 +3,6 @@ LLM-powered selector suggestion service.
 
 This module uses LLM to analyze page context and suggest alternative
 selectors when elements cannot be found using standard strategies.
-
-Requirements: 3.5
 """
 
 from typing import Optional

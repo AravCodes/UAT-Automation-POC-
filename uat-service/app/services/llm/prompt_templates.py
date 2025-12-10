@@ -5,7 +5,6 @@ This module provides prompt templates for story parsing, scenario generation,
 and element selector suggestions. All prompts include JSON schema definitions
 to ensure consistent, structured outputs from the LLM.
 
-Requirements: 1.4
 """
 
 from typing import Final

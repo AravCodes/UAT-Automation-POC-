@@ -4,8 +4,6 @@ Test scenario generator from acceptance criteria.
 This module generates comprehensive BDD test scenarios from acceptance
 criteria, including positive, negative, and edge case scenarios with
 dependency detection and priority assignment.
-
-Requirements: 2.2, 2.3, 2.4, 2.6, 2.7
 """
 
 import uuid

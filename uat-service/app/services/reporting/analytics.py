@@ -4,8 +4,6 @@ Analytics and trend analysis service.
 This module provides historical trend analysis, regression detection,
 and coverage metrics for test runs. It supports filtering by module,
 priority, status, and time range.
-
-Requirements: 6.2, 6.4, 6.7
 """
 
 from datetime import datetime, timedelta
@@ -13,15 +11,13 @@ from typing import Optional
 from dataclasses import dataclass
 from collections import defaultdict
 
-from sqlalchemy import and_, or_, func
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
 from app.models.story import ParsedStory, Priority
-from app.models.test_result import TestRunResult, ScenarioResult
 from app.services.storage.database import (
     TestRunModel,
     ScenarioResultModel,
-    StoryModel,
     get_db_session
 )
 from app.core.logging import get_logger

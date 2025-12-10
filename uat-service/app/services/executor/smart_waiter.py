@@ -4,8 +4,6 @@ Smart waiting strategies for dynamic content handling.
 This module implements intelligent waiting strategies that handle
 dynamic content loading, AJAX requests, and DOM mutations without
 relying on fixed timeouts.
-
-Requirements: 3.7
 """
 
 import asyncio

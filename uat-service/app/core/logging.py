@@ -3,8 +3,6 @@ Structured logging setup for UAT automation service.
 
 This module provides a comprehensive logging system with structured output,
 context management, and integration with the configuration system.
-
-Requirements: 1.5
 """
 
 import logging

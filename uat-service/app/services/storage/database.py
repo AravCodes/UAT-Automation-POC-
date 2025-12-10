@@ -4,8 +4,6 @@ Database models and setup using SQLAlchemy.
 This module provides SQLAlchemy ORM models for persisting user stories,
 acceptance criteria, test runs, and results. It supports both SQLite and
 PostgreSQL databases with proper indexing for performance.
-
-Requirements: 6.4
 """
 
 from datetime import datetime

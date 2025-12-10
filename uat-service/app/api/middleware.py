@@ -5,7 +5,6 @@ This module provides middleware components for the FastAPI application
 including API key authentication, CORS configuration, request/response logging,
 and request validation.
 
-Requirements: 9.7
 """
 
 import time
@@ -18,7 +17,6 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.core.config import get_config
 from app.core.logging import get_logger
-from app.core.exceptions import AuthenticationException
 
 
 logger = get_logger(__name__)

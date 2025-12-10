@@ -6,12 +6,9 @@ LLM (primary) → LLM (fallback) → NLP (legacy) → Manual mode
 
 It provides graceful degradation with warnings about reduced functionality
 at each fallback level.
-
-Requirements: 1.3
 """
 
-import asyncio
-from typing import Optional, Callable, Any, Literal
+from typing import Optional, Callable, Any
 from enum import Enum
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -23,7 +20,6 @@ from app.core.exceptions import (
     LLMTimeoutException,
     LLMResponseValidationException,
     ModelNotAvailableException,
-    ParsingException,
 )
 
 

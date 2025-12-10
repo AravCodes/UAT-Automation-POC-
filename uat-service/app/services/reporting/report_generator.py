@@ -4,8 +4,6 @@ Report generation service with multiple format support.
 This module provides comprehensive report generation for test runs,
 including HTML, JSON, and PDF formats. Reports include story-to-result
 traceability, executive summaries, and detailed diagnostics.
-
-Requirements: 6.1, 6.2, 6.3, 6.5, 6.6
 """
 
 import json
@@ -15,9 +13,9 @@ from pathlib import Path
 from typing import Optional
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from app.models.story import ParsedStory, AcceptanceCriterion
+from app.models.story import ParsedStory
 from app.models.test_scenario import TestScenario
-from app.models.test_result import TestRunResult, ScenarioResult, StepResult
+from app.models.test_result import TestRunResult, ScenarioResult
 from app.core.logging import get_logger
 from app.core.exceptions import ReportGenerationException
 

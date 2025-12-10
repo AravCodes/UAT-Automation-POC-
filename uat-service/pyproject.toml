@@ -3,7 +3,7 @@ name = "uat-service"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.119.0",
     "httpx>=0.28.1",
@@ -19,6 +19,7 @@ dependencies = [
     "pytest-xdist>=3.5.0",
     "python-dotenv>=1.1.1",
     "python-multipart>=0.0.20",
+    "redis>=7.1.0",
     "spacy>=3.8.7",
     "sqlmodel>=0.0.27",
     "uvicorn[standard]>=0.37.0",

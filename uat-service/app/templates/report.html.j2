@@ -3,50 +3,232 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UAT Report</title>
+  <title>UAT Test Run Report</title>
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; color: #fff; font-weight: 600; }
-    .pass { background: #16a34a; }
-    .fail { background: #dc2626; }
-    .partial { background: #d97706; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; }
-    .muted { color: #6b7280; font-size: 12px; }
+    :root {
+      --bg: #f9fafb;
+      --panel: #ffffff;
+      --border: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --pass: #16a34a;
+      --fail: #dc2626;
+      --partial: #d97706;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .subtitle {
+      margin: 0 0 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--panel);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+    }
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .card-value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge.pass { background: var(--pass); }
+    .badge.fail { background: var(--fail); }
+    .badge.partial { background: var(--partial); }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+    .muted { color: var(--text-muted); font-size: 12px; }
+
+    .table-wrapper {
+      margin-top: 20px;
+      background: var(--panel);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead {
+      background: #f3f4f6;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+    .scenario-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .scenario-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .steps {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .steps strong { color: #374151; }
+    .errors {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 6px 8px;
+      border-radius: 6px;
+      max-height: 160px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    .errors-empty {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
   </style>
   </head>
 <body>
-  <h1>UAT Report</h1>
-  <p>Score: <strong>{{ summary.score }}%</strong></p>
-  <p>Status: <span class="badge {{ summary.status }}">{{ summary.status|upper }}</span></p>
-  <p class="muted">Scenarios: {{ summary.passed }} passed / {{ summary.failed }} failed / {{ summary.total_scenarios }} total</p>
+  <div class="container">
+    <header style="margin-bottom: 16px;">
+      <h1>UAT Test Run Report</h1>
+      <p class="subtitle">Summary of automated user acceptance tests for the current run.</p>
+    </header>
 
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Scenario</th>
-        <th>Status</th>
-        <th>Errors</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for r in summary.results %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ r.scenario.name }}</td>
-        <td>
-          {% if r.passed %}
-            <span class="badge pass">PASS</span>
-          {% else %}
-            <span class="badge fail">FAIL</span>
-          {% endif %}
-        </td>
-        <td>{% if r.errors %}{{ r.errors|join('; ') }}{% else %}-{% endif %}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+    <section class="summary-grid">
+      <div class="card">
+        <div class="card-label">Overall Status</div>
+        <div class="card-value">
+          <span class="badge {{ summary.status }}">
+            <span class="status-dot"></span>
+            {{ summary.status|upper }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Score</div>
+        <div class="card-value">{{ summary.score }}%</div>
+        <div class="muted">Based on {{ summary.total_scenarios }} scenario variants.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Scenarios</div>
+        <div class="card-value">{{ summary.passed }} / {{ summary.total_scenarios }}</div>
+        <div class="muted">{{ summary.passed }} passed · {{ summary.failed }} failed</div>
+      </div>
+    </section>
+
+    <section class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px;">#</th>
+            <th style="width: 32%;">Scenario</th>
+            <th style="width: 90px;">Variant</th>
+            <th style="width: 80px;">Status</th>
+            <th>Details / Errors</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in summary.results %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+              <div class="scenario-title">{{ r.scenario.name }}</div>
+              <div class="scenario-meta">
+                {% if r.scenario.given %}
+                  <span class="steps"><strong>Given:</strong> {{ r.scenario.given|join('; ') }}</span><br />
+                {% endif %}
+                {% if r.scenario.when %}
+                  <span class="steps"><strong>When:</strong> {{ r.scenario.when|join('; ') }}</span><br />
+                {% endif %}
+                {% if r.scenario.then %}
+                  <span class="steps"><strong>Then:</strong> {{ r.scenario.then|join('; ') }}</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% if r.scenario.variant %}
+                {{ r.scenario.variant|capitalize }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>
+              {% if r.passed %}
+                <span class="badge pass">PASS</span>
+              {% else %}
+                <span class="badge fail">FAIL</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.errors and r.errors|length > 0 %}
+                <div class="errors">{{ r.errors|join('\n\n') }}</div>
+              {% else %}
+                <div class="errors-empty">No errors recorded.</div>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
 
 </body>
 </html>

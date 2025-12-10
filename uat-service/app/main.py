@@ -156,7 +156,26 @@ async def run_from_form(
     criteria = [c.strip() for c in acceptance_criteria.split("\n\n") if c.strip()]
     story = StoryRequest(title=title, description=None, acceptance_criteria=[{"text": c} for c in criteria], target_url=target_url)  # type: ignore[arg-type]
     result = await run_story(story)  # reuse logic
-    return RedirectResponse(url=result.details.get("report_html", "/"), status_code=303)
+
+    # If the client explicitly asks for JSON, return a JSON payload
+    accept_header = request.headers.get("accept", "")
+    report_url = result.details.get("report_html", "/")
+
+    if "application/json" in accept_header.lower():
+        return JSONResponse(
+            content={
+                "run_id": result.run_id,
+                "score": result.score,
+                "status": result.status,
+                "report_html": report_url,
+                "report_json": result.details.get("report_json"),
+                "artifacts_dir": result.details.get("artifacts_dir"),
+            },
+            status_code=200,
+        )
+
+    # Default browser behavior: redirect to the HTML report
+    return RedirectResponse(url=report_url, status_code=303)
 
 
 # ============================================================================

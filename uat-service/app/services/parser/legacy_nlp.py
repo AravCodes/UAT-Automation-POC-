@@ -4,13 +4,9 @@ Legacy NLP-based story parser (fallback).
 This module provides a fallback parser using basic NLP heuristics
 when LLM-based parsing fails. It's adapted from the V1 POC code
 and provides degraded functionality with warnings.
-
-Requirements: 1.3, 7.6
 """
 
 import re
-import uuid
-from typing import Optional
 
 from app.models.story import (
     ParsedStory,

@@ -3,8 +3,6 @@ Test execution API endpoints.
 
 This module provides REST API endpoints for executing test runs,
 checking run status, and managing test execution lifecycle.
-
-Requirements: 9.3
 """
 
 import uuid
@@ -17,7 +15,7 @@ from pydantic import BaseModel, Field
 
 from app.core.dependencies import ApiKeyDep, ConfigDep, RequestIdDep
 from app.core.logging import get_logger
-from app.models.test_result import TestRunResult, RunStatus
+from app.models.test_result import RunStatus
 
 
 logger = get_logger(__name__)

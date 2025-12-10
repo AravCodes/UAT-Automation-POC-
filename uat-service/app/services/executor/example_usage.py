@@ -6,7 +6,6 @@ to run test scenarios with full diagnostics and retry logic.
 """
 
 import asyncio
-from datetime import datetime
 
 from app.services.executor import (
     PlaywrightWrapper,

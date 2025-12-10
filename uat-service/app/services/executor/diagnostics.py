@@ -4,15 +4,12 @@ Comprehensive diagnostics capture for test execution.
 This module provides utilities for capturing screenshots, console logs,
 network requests, and other diagnostic information during test execution.
 It also generates execution timelines with step durations.
-
-Requirements: 5.2, 5.3, 5.7
 """
 
-import os
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional
 from dataclasses import dataclass, field
 
 from playwright.async_api import Page, Request, Response, ConsoleMessage

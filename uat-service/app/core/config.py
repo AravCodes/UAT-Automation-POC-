@@ -4,11 +4,8 @@ Configuration management system with Pydantic.
 This module provides environment variable validation and configuration management
 for the UAT automation service. It implements fail-fast validation for required
 configuration and provides sensible defaults for optional settings.
-
-Requirements: 8.1, 8.2, 8.3, 8.5
 """
 
-import os
 from pathlib import Path
 from typing import Optional, Literal
 from pydantic import Field, field_validator, model_validator
@@ -107,7 +104,7 @@ class Config(BaseSettings):
     )
     
     headless_mode: bool = Field(
-        default=True,
+        default=False,
         description="Run browser in headless mode"
     )
     

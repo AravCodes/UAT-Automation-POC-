@@ -4,8 +4,6 @@ Semantic DOM analyzer for building intelligent DOM trees.
 This module analyzes web pages to build semantic DOM trees that capture
 element roles, labels, relationships, and interactive elements. This enables
 intelligent element discovery without requiring explicit test IDs.
-
-Requirements: 3.1, 3.6
 """
 
 from typing import Optional, Any

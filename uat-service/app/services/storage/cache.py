@@ -4,8 +4,6 @@ Redis caching layer for performance optimization.
 This module provides caching functionality for DOM analysis results and LLM
 responses to improve performance and reduce API calls. It uses Redis as the
 caching backend with configurable TTL values.
-
-Requirements: Performance optimization
 """
 
 import json

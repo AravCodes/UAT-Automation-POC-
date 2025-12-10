@@ -3,8 +3,6 @@ FastAPI dependency injection setup.
 
 This module provides dependency injection functions for FastAPI endpoints,
 enabling clean separation of concerns and testability.
-
-Requirements: 9.1
 """
 
 from typing import Annotated, Optional
@@ -13,7 +11,6 @@ from sqlalchemy.orm import Session
 
 from .config import Config, get_config
 from .logging import get_logger
-from .exceptions import AuthenticationException
 
 
 logger = get_logger(__name__)

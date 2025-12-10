@@ -3,8 +3,6 @@ Custom exception hierarchy for UAT automation service.
 
 This module defines a comprehensive exception hierarchy that provides
 clear error categorization and handling throughout the application.
-
-Requirements: 1.5
 """
 
 from typing import Optional, Any

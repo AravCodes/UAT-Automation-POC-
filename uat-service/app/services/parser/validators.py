@@ -4,8 +4,6 @@ Schema validators for parsed story data.
 This module provides comprehensive validation for parsed stories,
 acceptance criteria, and test scenarios using Pydantic validation
 with custom business rules.
-
-Requirements: 1.5
 """
 
 from typing import Optional, Any
@@ -15,7 +13,6 @@ from app.models.story import (
     ParsedStory,
     AcceptanceCriterion,
     StoryInput,
-    Priority,
 )
 from app.models.test_scenario import (
     TestScenario,

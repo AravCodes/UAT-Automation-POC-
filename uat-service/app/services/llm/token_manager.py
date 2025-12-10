@@ -5,7 +5,6 @@ This module implements a token bucket algorithm to manage rate limits for
 Groq API requests. It queues requests when approaching rate limits and
 ensures smooth request flow without hitting API rate limits.
 
-Requirements: 1.7
 """
 
 import asyncio

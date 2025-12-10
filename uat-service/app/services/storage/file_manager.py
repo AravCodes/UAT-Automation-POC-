@@ -4,8 +4,6 @@ File storage manager for test artifacts.
 This module provides file storage management for screenshots, logs, DOM snapshots,
 and other test artifacts. Files are organized by run_id and scenario_id for easy
 retrieval and cleanup.
-
-Requirements: 5.2
 """
 
 import os

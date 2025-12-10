@@ -3,14 +3,12 @@ Report retrieval API endpoints.
 
 This module provides REST API endpoints for retrieving test run results,
 reports, and analytics with pagination and filtering support.
-
-Requirements: 9.4, 9.5
 """
 
 from datetime import datetime
 from typing import Optional, Literal
 from fastapi import APIRouter, HTTPException, status, Query
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from app.core.dependencies import ApiKeyDep, PaginationDep, RequestIdDep

@@ -4,19 +4,16 @@ Smart retry logic and flaky test detection.
 This module implements intelligent retry mechanisms for failed tests,
 tracks flakiness metrics, and provides utilities for identifying
 and managing flaky tests.
-
-Requirements: 5.4, 5.5
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, Callable, Any, TypeVar, Awaitable
 from dataclasses import dataclass, field
 from collections import defaultdict
 
 from app.core.config import get_config
 from app.core.logging import get_logger
-from app.models.test_result import ScenarioResult, ScenarioStatus
 
 
 logger = get_logger(__name__)

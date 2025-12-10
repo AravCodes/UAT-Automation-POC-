@@ -3,8 +3,6 @@ Story management API endpoints.
 
 This module provides REST API endpoints for managing user stories,
 including creation, retrieval, updating, and deletion.
-
-Requirements: 9.2
 """
 
 import uuid
@@ -15,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.core.dependencies import ApiKeyDep, ConfigDep, PaginationDep, RequestIdDep
 from app.core.logging import get_logger
-from app.models.story import StoryInput, ParsedStory, AcceptanceCriterion, Priority
+from app.models.story import StoryInput, ParsedStory
 
 
 logger = get_logger(__name__)

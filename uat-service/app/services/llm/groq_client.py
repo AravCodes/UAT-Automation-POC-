@@ -5,13 +5,12 @@ This module provides a robust client for interacting with Groq's LLM API,
 implementing exponential backoff retry logic, primary/fallback model support,
 and JSON schema validation for LLM responses.
 
-Requirements: 1.1, 1.2, 1.4, 1.5, 1.6
 """
 
 import asyncio
 import json
 import time
-from typing import Any, Optional, Literal
+from typing import Any, Optional
 from enum import Enum
 
 import httpx

@@ -7,8 +7,6 @@ This module tests the end-to-end flow:
 3. Test scenario generation
 4. Test execution
 5. Report generation
-
-Requirements: All (Task 14.1)
 """
 
 import pytest

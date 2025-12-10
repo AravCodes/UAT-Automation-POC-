@@ -3,14 +3,12 @@ Webhook management API endpoints.
 
 This module provides REST API endpoints for managing webhooks that receive
 notifications when test runs complete or other events occur.
-
-Requirements: 9.6
 """
 
 import uuid
 import httpx
 from datetime import datetime
-from typing import Optional, Literal
+from typing import Optional
 from enum import Enum
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, HttpUrl, field_validator

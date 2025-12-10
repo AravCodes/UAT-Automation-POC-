@@ -3,14 +3,11 @@ CLI support for UAT Automation Service.
 
 This module provides command-line interface support for running the UAT service
 with environment overrides and legacy mode support.
-
-Requirements: 7.6, 8.6
 """
 
 import argparse
 import sys
 import os
-from typing import Optional
 import uvicorn
 from pathlib import Path
 

@@ -4,15 +4,12 @@ Parallel test execution runner.
 This module implements the test execution engine that runs test scenarios
 in parallel with configurable concurrency. It maintains test context and
 state across steps, implements retry logic, and captures comprehensive diagnostics.
-
-Requirements: 5.1, 5.6
 """
 
 import asyncio
 import uuid
 from datetime import datetime
 from typing import Optional, Any
-from collections import defaultdict
 
 from pydantic import BaseModel, Field
 from playwright.async_api import Page, BrowserContext, Error as PlaywrightError
@@ -20,8 +17,6 @@ from playwright.async_api import Page, BrowserContext, Error as PlaywrightError
 from app.core.config import get_config
 from app.core.exceptions import (
     ExecutionException,
-    TimeoutException,
-    TestContextException
 )
 from app.core.logging import get_logger
 from app.models.test_scenario import TestScenario, TestStep, ActionType

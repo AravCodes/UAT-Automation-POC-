@@ -4,11 +4,8 @@ Playwright wrapper for browser lifecycle management.
 This module provides a high-level abstraction over Playwright for managing
 browser instances, contexts, and pages. It supports headless and headed modes,
 handles browser lifecycle, and provides utilities for test execution.
-
-Requirements: 5.1
 """
 
-import asyncio
 from typing import Optional, Literal
 from contextlib import asynccontextmanager
 
@@ -22,7 +19,7 @@ from playwright.async_api import (
 )
 
 from app.core.config import get_config
-from app.core.exceptions import BrowserException, ExecutionException
+from app.core.exceptions import BrowserException
 from app.core.logging import get_logger
 
 

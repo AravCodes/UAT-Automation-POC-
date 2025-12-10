@@ -3,8 +3,6 @@ Main story parser with LLM integration.
 
 This module provides the primary story parsing functionality using LLM
 with automatic fallback to legacy NLP parser when LLM fails.
-
-Requirements: 2.1, 2.5
 """
 
 import uuid

@@ -4,8 +4,6 @@ Multi-strategy element finder for intelligent element discovery.
 This module implements a sophisticated element finding system that uses
 multiple strategies to locate elements without requiring explicit test IDs.
 It includes fuzzy matching and context-aware disambiguation.
-
-Requirements: 3.2, 3.3, 3.4
 """
 
 from typing import Optional, Any
