@@ -3,78 +3,594 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UAT Runner (POC)</title>
+  <title>UAT Runner | Automated Testing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #f6f7f9; }
-    .container { max-width: 900px; margin: 0 auto; }
-    .card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px; }
-    h1 { margin: 0 0 8px; color: #111827; }
-    h2 { margin: 0 0 16px; color: #111827; font-size: 1.25rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
-    input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #d7dce1; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; }
-    label { display: block; font-weight: 600; margin-top: 12px; color: #111827; }
-    button { padding: 10px 12px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 16px; font-size: 1rem; }
-    button:hover { background: #1d4ed8; }
-    button.secondary { background: #10b981; }
-    button.secondary:hover { background: #059669; }
-    .hint { color: #64748b; font-size: 12px; margin-top: 6px; }
-    .divider { text-align: center; margin: 24px 0; color: #64748b; font-weight: 600; }
-    .file-input-wrapper { position: relative; }
-    input[type="file"] { padding: 8px; }
-    .download-link { display: inline-block; margin-top: 8px; color: #2563eb; text-decoration: none; font-size: 0.875rem; }
-    .download-link:hover { text-decoration: underline; }
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #a5b4fc;
+      --secondary: #10b981;
+      --secondary-dark: #059669;
+      --accent: #f59e0b;
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #1e293b;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      background-attachment: fixed;
+    }
+    
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.5);
+    }
+    
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+    
+    .header h1 {
+      margin: 0 0 12px;
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.125rem;
+      margin: 0;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .card-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      font-size: 1.5rem;
+    }
+    
+    .card-icon.excel {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .card-icon.manual {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+    
+    .card-header-text h2 {
+      margin: 0 0 4px;
+      color: var(--text-primary);
+      font-size: 1.375rem;
+      font-weight: 700;
+    }
+    
+    .card-header-text p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+    
+    input, textarea, select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: #fff;
+      color: var(--text-primary);
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 160px;
+      line-height: 1.6;
+    }
+    
+    .file-upload {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: #fafafa;
+    }
+    
+    .file-upload:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .file-upload.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.1);
+      transform: scale(1.02);
+    }
+    
+    .file-upload input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    
+    .file-upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+    
+    .file-upload-text {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+    
+    .file-upload-text strong {
+      color: var(--primary);
+    }
+    
+    .file-name {
+      margin-top: 12px;
+      padding: 10px 16px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 8px;
+      color: var(--primary);
+      font-weight: 500;
+      display: none;
+    }
+    
+    .file-name.visible {
+      display: inline-block;
+    }
+    
+    .hint {
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .hint svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.5);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px -10px rgba(99, 102, 241, 0.6);
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+      color: #fff;
+      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.5);
+    }
+    
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px -10px rgba(16, 185, 129, 0.6);
+    }
+    
+    .btn-full {
+      width: 100%;
+    }
+    
+    .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 12px 20px;
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      border: 2px solid var(--secondary);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .download-link:hover {
+      background: var(--secondary);
+      color: #fff;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 40px 0;
+    }
+    
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+    
+    .divider span {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+    
+    .feature {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .feature:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-4px);
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    
+    .feature h3 {
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+    
+    .feature p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px; }
+      .header h1 { font-size: 1.875rem; }
+      .card { padding: 24px; }
+      .features { grid-template-columns: 1fr; }
+    }
+    
+    /* Loading state */
+    .btn.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    
+    .btn.loading::after {
+      content: '';
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
+  <div class="bg-pattern"></div>
+  
   <div class="container">
-    <h1>UAT Automation Service</h1>
-    <p style="color: #64748b; margin-bottom: 24px;">Run user stories against your application using LLM-based parsing and execution</p>
+    <header class="header">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h1>UAT Automation Service</h1>
+      <p>Run user stories against your application using intelligent LLM-based parsing and automated execution</p>
+    </header>
 
     <!-- Excel Upload Section -->
     <div class="card">
-      <h2>📊 Upload Excel File</h2>
-      <p style="color: #64748b; margin-bottom: 16px;">Upload an Excel file containing multiple user stories. Download the template below.</p>
-      
-      <form method="post" action="/upload-excel" enctype="multipart/form-data">
-        <label for="excel_file">Excel File (.xlsx)</label>
-        <div class="file-input-wrapper">
-          <input type="file" id="excel_file" name="file" accept=".xlsx,.xls" required />
+      <div class="card-header">
+        <div class="card-icon excel">📊</div>
+        <div class="card-header-text">
+          <h2>Batch Upload</h2>
+          <p>Upload an Excel file with multiple user stories</p>
         </div>
-        <div class="hint">Expected columns: Test ID, Title, As a, I want to, So that, Acceptance Criteria, Test IDs</div>
+      </div>
+      
+      <form method="post" action="/upload-excel" enctype="multipart/form-data" id="excelForm">
+        <div class="form-group">
+          <label for="excel_file">Excel File</label>
+          <div class="file-upload" id="fileUploadZone">
+            <input type="file" id="excel_file" name="file" accept=".xlsx,.xls" required />
+            <div class="file-upload-icon">📁</div>
+            <div class="file-upload-text">
+              <strong>Click to upload</strong> or drag and drop<br>
+              .xlsx or .xls files
+            </div>
+            <div class="file-name" id="fileName"></div>
+          </div>
+          <div class="hint">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Expected columns: Test ID, Title, As a, I want to, So that, Acceptance Criteria, Test IDs
+          </div>
+        </div>
         
-        <label for="excel_target">Target URL</label>
-        <input id="excel_target" name="target_url" value="{{ default_target }}" required />
+        <div class="form-group">
+          <label for="excel_target">Target URL</label>
+          <input type="url" id="excel_target" name="target_url" value="{{ default_target }}" placeholder="https://your-app.com" required />
+        </div>
 
-        <button type="submit" class="secondary">📤 Upload and Run All Stories</button>
+        <button type="submit" class="btn btn-secondary btn-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          Upload and Run All Stories
+        </button>
       </form>
       
-      <a href="/static/user_stories.xlsx" class="download-link" download="user_stories.xlsx">📥 Download Excel Template</a>
+      <a href="/static/user_stories.xlsx" class="download-link" download="user_stories.xlsx">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Download Excel Template
+      </a>
     </div>
 
-    <div class="divider">OR</div>
+    <div class="divider">
+      <span>or</span>
+    </div>
 
     <!-- Manual Entry Section -->
     <div class="card">
-      <h2>✍️ Manual Entry</h2>
-      <p style="color: #64748b; margin-bottom: 16px;">Enter a single user story manually</p>
+      <div class="card-header">
+        <div class="card-icon manual">✍️</div>
+        <div class="card-header-text">
+          <h2>Manual Entry</h2>
+          <p>Enter a single user story manually</p>
+        </div>
+      </div>
       
-      <form method="post" action="/run">
-        <label for="title">Story Title</label>
-        <input id="title" name="title" placeholder="Browse Products" required />
+      <form method="post" action="/run" id="manualForm">
+        <div class="form-group">
+          <label for="title">Story Title</label>
+          <input type="text" id="title" name="title" placeholder="e.g., Browse Products, User Login" required />
+        </div>
 
-        <label for="criteria">Acceptance Criteria (separate scenarios by a blank line)</label>
-        <textarea id="criteria" name="acceptance_criteria" rows="8" placeholder="Given I am on the homepage
+        <div class="form-group">
+          <label for="criteria">Acceptance Criteria</label>
+          <textarea id="criteria" name="acceptance_criteria" placeholder="Given I am on the homepage
 When I view the products section
 Then I should see a grid of products with images, names, prices, and descriptions
-And each product should have an &quot;Add to Cart&quot; button" required></textarea>
-        <div class="hint">Separate each scenario with a blank line. Use Given/When/Then format.</div>
+And each product should have an 'Add to Cart' button" required></textarea>
+          <div class="hint">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Separate each scenario with a blank line. Use Given/When/Then format.
+          </div>
+        </div>
 
-        <label for="target">Target URL</label>
-        <input id="target" name="target_url" value="{{ default_target }}" required />
+        <div class="form-group">
+          <label for="target">Target URL</label>
+          <input type="url" id="target" name="target_url" value="{{ default_target }}" placeholder="https://your-app.com" required />
+        </div>
 
-        <button type="submit">▶️ Run Story</button>
+        <button type="submit" class="btn btn-primary btn-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Run Story
+        </button>
       </form>
     </div>
+    
+    <!-- Features Section -->
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🤖</div>
+        <h3>LLM-Powered</h3>
+        <p>Intelligent parsing of user stories using advanced language models</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>Automated Execution</h3>
+        <p>Run tests automatically against your target application</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📋</div>
+        <h3>Detailed Reports</h3>
+        <p>Get comprehensive reports with step-by-step results</p>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // File upload handling
+    const fileInput = document.getElementById('excel_file');
+    const uploadZone = document.getElementById('fileUploadZone');
+    const fileNameDisplay = document.getElementById('fileName');
+    
+    fileInput.addEventListener('change', function() {
+      if (this.files.length > 0) {
+        fileNameDisplay.textContent = '📄 ' + this.files[0].name;
+        fileNameDisplay.classList.add('visible');
+      } else {
+        fileNameDisplay.classList.remove('visible');
+      }
+    });
+    
+    // Drag and drop
+    uploadZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('dragover');
+    });
+    
+    uploadZone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+    });
+    
+    uploadZone.addEventListener('drop', function(e) {
+      this.classList.remove('dragover');
+    });
+    
+    // Form submission loading states
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function() {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.classList.add('loading');
+        btn.innerHTML = '<span>Processing...</span>';
+      });
+    });
+  </script>
 </body>
 </html>
 

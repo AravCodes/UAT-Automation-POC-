@@ -3,142 +3,703 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UAT Report</title>
+  <title>UAT Report | Test Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #f6f7f9; }
-    .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.875rem; }
-    .pass { background: #16a34a; }
-    .fail { background: #dc2626; }
-    .partial { background: #d97706; }
-    .summary { display: flex; gap: 24px; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 6px; }
-    .summary-item { flex: 1; }
-    .summary-value { font-size: 2rem; font-weight: 700; color: #111827; }
-    .summary-label { color: #6b7280; font-size: 0.875rem; margin-top: 4px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e5e7eb; }
-    th { background: #f9fafb; font-weight: 600; color: #111827; }
-    .scenario-row { cursor: pointer; }
-    .scenario-row:hover { background: #f9fafb; }
-    .steps-details { display: none; padding: 16px; background: #f9fafb; border-radius: 6px; margin-top: 8px; }
-    .steps-details.expanded { display: block; }
-    .step-item { padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-    .step-item:last-child { border-bottom: none; }
-    .step-type { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 8px; }
-    .step-type.given { background: #dbeafe; color: #1e40af; }
-    .step-type.when { background: #fef3c7; color: #92400e; }
-    .step-type.then { background: #d1fae5; color: #065f46; }
-    .step-text { color: #374151; }
-    .step-error { color: #dc2626; font-size: 0.875rem; margin-top: 4px; }
-    .muted { color: #6b7280; font-size: 12px; }
-    h1 { margin: 0 0 8px; color: #111827; }
-    h2 { margin: 24px 0 16px; color: #111827; font-size: 1.25rem; }
-  </style>
-  <script>
-    function toggleSteps(index) {
-      const details = document.getElementById('steps-' + index);
-      details.classList.toggle('expanded');
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #10b981;
+      --success: #22c55e;
+      --success-bg: #dcfce7;
+      --warning: #f59e0b;
+      --warning-bg: #fef3c7;
+      --danger: #ef4444;
+      --danger-bg: #fee2e2;
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #1e293b;
+      --card-bg: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
-  </script>
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      background-attachment: fixed;
+    }
+    
+    .bg-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-4px);
+    }
+    
+    .header-title h1 {
+      margin: 0 0 4px;
+      color: #fff;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+    
+    .header-title p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+    }
+    
+    .main-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    
+    .summary-section {
+      padding: 32px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+    }
+    
+    .summary-card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .summary-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .summary-card.score {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+    
+    .summary-card.score .summary-value,
+    .summary-card.score .summary-label {
+      color: #fff;
+    }
+    
+    .summary-value {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    
+    .summary-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    
+    .badge.pass {
+      background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    .badge.fail {
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .badge.partial {
+      background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    
+    .badge-sm {
+      padding: 4px 12px;
+      font-size: 0.75rem;
+    }
+    
+    .results-section {
+      padding: 32px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    
+    .section-title-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 10px;
+      color: #fff;
+    }
+    
+    .scenario-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .scenario-item {
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .scenario-item:hover {
+      border-color: var(--primary-dark);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+    }
+    
+    .scenario-item.expanded {
+      border-color: var(--primary);
+    }
+    
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      cursor: pointer;
+      background: #fafafa;
+      transition: background 0.2s ease;
+    }
+    
+    .scenario-header:hover {
+      background: #f1f5f9;
+    }
+    
+    .scenario-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      flex-shrink: 0;
+    }
+    
+    .scenario-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .scenario-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .scenario-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+    
+    .scenario-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .scenario-status {
+      flex-shrink: 0;
+    }
+    
+    .toggle-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    
+    .scenario-item.expanded .toggle-icon {
+      transform: rotate(180deg);
+    }
+    
+    .steps-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    
+    .scenario-item.expanded .steps-panel {
+      max-height: 1000px;
+    }
+    
+    .steps-content {
+      padding: 24px;
+      background: #fff;
+      border-top: 1px solid var(--border);
+    }
+    
+    .steps-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border-left: 4px solid var(--border);
+    }
+    
+    .step-item.passed {
+      border-left-color: var(--success);
+      background: linear-gradient(90deg, rgba(34, 197, 94, 0.05) 0%, transparent 100%);
+    }
+    
+    .step-item.failed {
+      border-left-color: var(--danger);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%);
+    }
+    
+    .step-type-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    
+    .step-type-badge.given {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .step-type-badge.when {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .step-type-badge.then {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .step-type-badge.and {
+      background: #f3e8ff;
+      color: #6b21a8;
+    }
+    
+    .step-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .step-text {
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+    }
+    
+    .step-result {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 0.8125rem;
+    }
+    
+    .step-result.success {
+      color: var(--success);
+    }
+    
+    .step-result.error {
+      color: var(--danger);
+    }
+    
+    .step-status-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .step-status-icon.success {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+    
+    .step-status-icon.error {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+    
+    /* Progress ring */
+    .progress-ring {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 8px;
+    }
+    
+    .progress-ring svg {
+      transform: rotate(-90deg);
+    }
+    
+    .progress-ring circle {
+      fill: none;
+      stroke-width: 6;
+    }
+    
+    .progress-ring .bg {
+      stroke: #e2e8f0;
+    }
+    
+    .progress-ring .progress {
+      stroke: url(#gradient);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease;
+    }
+    
+    .progress-ring .value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    @media (max-width: 1024px) {
+      .summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px; }
+      .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .scenario-header { padding: 16px; }
+      .scenario-meta { flex-wrap: wrap; gap: 8px; }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .scenario-item {
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    .scenario-item:nth-child(1) { animation-delay: 0.1s; }
+    .scenario-item:nth-child(2) { animation-delay: 0.2s; }
+    .scenario-item:nth-child(3) { animation-delay: 0.3s; }
+    .scenario-item:nth-child(4) { animation-delay: 0.4s; }
+    .scenario-item:nth-child(5) { animation-delay: 0.5s; }
+  </style>
 </head>
 <body>
+  <div class="bg-pattern"></div>
+  
+  <svg style="position: absolute; width: 0; height: 0;">
+    <defs>
+      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#6366f1"/>
+        <stop offset="100%" stop-color="#10b981"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  
   <div class="container">
-    <h1>UAT Report</h1>
-    <p class="muted">Generated from user story acceptance criteria using LLM-based parsing</p>
-    
-    <div class="summary">
-      <div class="summary-item">
-        <div class="summary-value">{{ summary.score }}%</div>
-        <div class="summary-label">Overall Score</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-value">
-          <span class="badge {{ summary.status }}">{{ summary.status|upper }}</span>
+    <header class="header">
+      <div class="header-left">
+        <a href="/" class="back-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back
+        </a>
+        <div class="header-title">
+          <h1>UAT Report</h1>
+          <p>Test results from automated user story execution</p>
         </div>
-        <div class="summary-label">Status</div>
       </div>
-      <div class="summary-item">
-        <div class="summary-value">{{ summary.passed }}</div>
-        <div class="summary-label">Passed Scenarios</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-value">{{ summary.failed }}</div>
-        <div class="summary-label">Failed Scenarios</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-value">{{ summary.total_scenarios }}</div>
-        <div class="summary-label">Total Scenarios</div>
-      </div>
-    </div>
+    </header>
 
-    <h2>Scenario Results</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Scenario</th>
-          <th>Status</th>
-          <th>Steps</th>
-          <th>Errors</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for r in summary.results %}
-        <tr class="scenario-row" onclick="toggleSteps({{ loop.index0 }})">
-          <td>{{ loop.index }}</td>
-          <td>
-            {% if r.scenario is string %}
-              {{ r.scenario }}
-            {% else %}
-              {{ r.scenario.name }}
-            {% endif %}
-          </td>
-          <td>
-            {% if r.passed %}
-              <span class="badge pass">PASS</span>
-            {% else %}
-              <span class="badge fail">FAIL</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if r.steps %}
-              {{ r.steps|length }} steps
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td>
-            {% if r.errors %}
-              {{ r.errors|length }} error(s)
-            {% else %}
-              -
-            {% endif %}
-          </td>
-        </tr>
-        {% if r.steps %}
-        <tr>
-          <td colspan="5">
-            <div class="steps-details" id="steps-{{ loop.index0 }}">
-              <h3 style="margin-top: 0;">Step Details</h3>
-              {% for step in r.steps %}
-                <div class="step-item">
-                  <span class="step-type {{ step.type }}">{{ step.type|upper }}</span>
-                  <span class="step-text">{{ step.step }}</span>
-                  {% if not step.passed %}
-                    <div class="step-error">❌ {{ step.error }}</div>
+    <div class="main-card">
+      <div class="summary-section">
+        <div class="summary-grid">
+          <div class="summary-card score">
+            <div class="progress-ring">
+              <svg viewBox="0 0 80 80">
+                <circle class="bg" cx="40" cy="40" r="34"/>
+                <circle class="progress" cx="40" cy="40" r="34" 
+                  stroke-dasharray="213.6" 
+                  stroke-dashoffset="{{ 213.6 - (213.6 * summary.score / 100) }}"/>
+              </svg>
+              <div class="value" style="color: #fff;">{{ summary.score }}%</div>
+            </div>
+            <div class="summary-label">Overall Score</div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-value">
+              <span class="badge {{ summary.status }}">
+                {% if summary.status == 'pass' %}✓{% elif summary.status == 'fail' %}✕{% else %}~{% endif %}
+                {{ summary.status|upper }}
+              </span>
+            </div>
+            <div class="summary-label">Status</div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-value" style="color: var(--success);">{{ summary.passed }}</div>
+            <div class="summary-label">Passed Scenarios</div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-value" style="color: var(--danger);">{{ summary.failed }}</div>
+            <div class="summary-label">Failed Scenarios</div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-value">{{ summary.total_scenarios }}</div>
+            <div class="summary-label">Total Scenarios</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-title-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+              </svg>
+            </span>
+            Scenario Results
+          </h2>
+        </div>
+        
+        <div class="scenario-list">
+          {% for r in summary.results %}
+          <div class="scenario-item" id="scenario-{{ loop.index0 }}">
+            <div class="scenario-header" onclick="toggleScenario({{ loop.index0 }})">
+              <div class="scenario-number">{{ loop.index }}</div>
+              <div class="scenario-info">
+                <div class="scenario-name">
+                  {% if r.scenario is string %}
+                    {{ r.scenario }}
                   {% else %}
-                    <div style="color: #16a34a; font-size: 0.875rem; margin-top: 4px;">✓ Passed</div>
+                    {{ r.scenario.name }}
                   {% endif %}
                 </div>
-              {% endfor %}
+                <div class="scenario-meta">
+                  {% if r.steps %}
+                  <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    {{ r.steps|length }} steps
+                  </span>
+                  {% endif %}
+                  {% if r.errors %}
+                  <span style="color: var(--danger);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    {{ r.errors|length }} error(s)
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="scenario-status">
+                {% if r.passed %}
+                  <span class="badge badge-sm pass">✓ Pass</span>
+                {% else %}
+                  <span class="badge badge-sm fail">✕ Fail</span>
+                {% endif %}
+              </div>
+              <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
             </div>
-          </td>
-        </tr>
-        {% endif %}
-      {% endfor %}
-      </tbody>
-    </table>
-
+            
+            {% if r.steps %}
+            <div class="steps-panel">
+              <div class="steps-content">
+                <div class="steps-title">Step Details</div>
+                <div class="step-list">
+                  {% for step in r.steps %}
+                  <div class="step-item {% if step.passed %}passed{% else %}failed{% endif %}">
+                    <span class="step-type-badge {{ step.type }}">{{ step.type }}</span>
+                    <div class="step-content">
+                      <div class="step-text">{{ step.step }}</div>
+                      {% if step.passed %}
+                      <div class="step-result success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Passed
+                      </div>
+                      {% else %}
+                      <div class="step-result error">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        {{ step.error }}
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="step-status-icon {% if step.passed %}success{% else %}error{% endif %}">
+                      {% if step.passed %}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script>
+    function toggleScenario(index) {
+      const item = document.getElementById('scenario-' + index);
+      item.classList.toggle('expanded');
+    }
+  </script>
 </body>
 </html>
